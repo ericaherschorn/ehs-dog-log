@@ -1,0 +1,4979 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>EHS Dog Log</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800;900&display=swap" rel="stylesheet">
+  <style>
+    /* ── Reset & base ─────────────────────────────────────── */
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg:          #f7f5f2;
+      --text:        #2c2825;
+      --muted:       #6e6460;
+      --green:       #4a7c59;
+      --green-dark:  #3a6347;
+      --green-light: #e8f0eb;
+      --border:      #d6cfc7;
+      --card:        #ffffff;
+      --red:         #c0392b;
+      --red-light:   #fdf2f1;
+      --amber:       #935f00;
+      --shadow:      0 2px 10px rgba(44,40,37,0.10);
+      --radius:      10px;
+    }
+
+    body {
+      font-family: 'Nunito', sans-serif;
+      font-size: 20px;
+      color: var(--text);
+      background: var(--bg);
+      line-height: 1.5;
+      min-height: 100vh;
+      overflow-y: scroll;
+    }
+
+    .hidden { display: none !important; }
+
+    /* ── Buttons ──────────────────────────────────────────── */
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      min-height: 52px;
+      padding: 12px 24px;
+      border: none;
+      border-radius: var(--radius);
+      font-family: 'Nunito', sans-serif;
+      font-size: 20px;
+      font-weight: 700;
+      cursor: pointer;
+      transition: background 0.15s, border-color 0.15s, transform 0.1s;
+      text-decoration: none;
+      white-space: nowrap;
+    }
+    .btn:active { transform: scale(0.97); }
+
+    .btn-primary   { background: var(--green); color: white; }
+    .btn-primary:hover { background: var(--green-dark); }
+
+    .btn-secondary {
+      background: white;
+      color: var(--text);
+      border: 2px solid var(--border);
+    }
+    .btn-secondary:hover { background: var(--green-light); border-color: var(--green); }
+
+    .btn-danger {
+      background: var(--red-light);
+      color: var(--red);
+      border: 2px solid var(--red);
+    }
+    .btn-danger:hover { background: var(--red); color: white; }
+
+    .btn-ghost {
+      background: transparent;
+      color: var(--green-dark);
+      text-decoration: underline;
+      padding: 8px 12px;
+      min-height: auto;
+      font-size: 18px;
+      border: none;
+      cursor: pointer;
+      font-family: 'Nunito', sans-serif;
+      font-weight: 700;
+    }
+    .btn-ghost:hover { color: var(--green-dark); }
+
+    .btn-sm {
+      min-height: 40px;
+      padding: 8px 16px;
+      font-size: 17px;
+    }
+
+    /* ── Form elements ────────────────────────────────────── */
+    .field-label {
+      display: block;
+      font-weight: 800;
+      font-size: 16px;
+      margin-bottom: 6px;
+      color: var(--text);
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    input[type="text"],
+    input[type="number"],
+    input[type="date"],
+    input[type="time"],
+    select,
+    textarea {
+      width: 100%;
+      min-height: 48px;
+      padding: 10px 14px;
+      border: 2px solid var(--border);
+      border-radius: 8px;
+      font-family: 'Nunito', sans-serif;
+      font-size: 20px;
+      color: var(--text);
+      background: white;
+      transition: border-color 0.15s, box-shadow 0.15s;
+      -webkit-appearance: none;
+      appearance: none;
+    }
+    input:focus, select:focus, textarea:focus {
+      outline: none;
+      border-color: var(--green);
+      box-shadow: 0 0 0 3px rgba(74,124,89,0.2);
+    }
+    textarea {
+      resize: vertical;
+      min-height: 110px;
+      line-height: 1.5;
+    }
+    select {
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='20' height='20' viewBox='0 0 24 24'%3E%3Cpath fill='%232c2825' d='M7 10l5 5 5-5z'/%3E%3C/svg%3E");
+      background-repeat: no-repeat;
+      background-position: right 12px center;
+      padding-right: 44px;
+    }
+
+    /* ── Utility ──────────────────────────────────────────── */
+    .section-title {
+      font-size: 22px;
+      font-weight: 900;
+      color: var(--text);
+      margin-bottom: 16px;
+    }
+    .muted { color: var(--muted); }
+    .error-msg {
+      color: var(--red);
+      font-weight: 700;
+      font-size: 18px;
+      margin-top: 8px;
+    }
+    .success-msg {
+      color: var(--green-dark);
+      font-weight: 700;
+      font-size: 18px;
+      margin-top: 8px;
+    }
+
+    /* ── Loading spinner ──────────────────────────────────── */
+    .spinner {
+      display: inline-block;
+      width: 20px;
+      height: 20px;
+      border: 3px solid var(--border);
+      border-top-color: var(--green);
+      border-radius: 50%;
+      animation: spin 0.7s linear infinite;
+      vertical-align: middle;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    /* ══════════════════════════════════════════════════════ */
+    /* VIEW: Login                                            */
+    /* ══════════════════════════════════════════════════════ */
+    #view-login {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      min-height: 100vh;
+      padding: 24px;
+    }
+    /* VIEW: Shift Selector                                   */
+    /* ══════════════════════════════════════════════════════ */
+    #view-shift-select {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      min-height: 100vh;
+      padding: 24px;
+    }
+    .shift-card {
+      background: white;
+      border-radius: 16px;
+      box-shadow: var(--shadow);
+      padding: 48px 40px;
+      max-width: 480px;
+      width: 100%;
+      text-align: center;
+    }
+    .shift-card-logo {
+      font-size: 38px;
+      font-weight: 900;
+      color: var(--green);
+      margin-bottom: 6px;
+    }
+    .shift-card-date {
+      font-size: 20px;
+      color: var(--muted);
+      margin-bottom: 36px;
+    }
+    .shift-card-prompt {
+      font-size: 24px;
+      font-weight: 700;
+      margin-bottom: 20px;
+    }
+    .shift-buttons {
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+    }
+    .shift-btn {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 18px 20px;
+      border-radius: var(--radius);
+      border: 3px solid var(--border);
+      background: white;
+      cursor: pointer;
+      font-family: 'Nunito', sans-serif;
+      transition: all 0.15s;
+      gap: 2px;
+    }
+    .shift-btn .shift-name {
+      font-size: 26px;
+      font-weight: 800;
+      color: var(--text);
+    }
+    .shift-btn .shift-time {
+      font-size: 16px;
+      color: var(--muted);
+    }
+    .shift-btn.suggested {
+      border-color: var(--green);
+      background: var(--green-light);
+    }
+    .shift-btn.suggested .shift-name { color: var(--green-dark); }
+    .shift-btn:hover {
+      border-color: var(--green);
+      background: var(--green-light);
+      transform: translateY(-2px);
+      box-shadow: 0 4px 12px rgba(74,124,89,0.2);
+    }
+
+    /* ══════════════════════════════════════════════════════ */
+    /* APP CHROME (header + filter bar)                       */
+    /* ══════════════════════════════════════════════════════ */
+    .app-header {
+      background: white;
+      border-bottom: 2px solid var(--border);
+      padding: 14px 20px;
+      position: sticky;
+      top: 0;
+      z-index: 100;
+    }
+    .header-inner {
+      max-width: 1400px;
+      margin: 0 auto;
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      flex-wrap: wrap;
+    }
+    .header-logo {
+      font-size: 22px;
+      font-weight: 900;
+      color: var(--green);
+      flex: 0 0 auto;
+    }
+    .header-badge {
+      font-size: 18px;
+      font-weight: 700;
+      color: var(--muted);
+      flex: 1 1 auto;
+    }
+    .header-nav {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+      align-items: center;
+      flex: 0 0 auto;
+    }
+    .change-shift-link {
+      font-size: 16px;
+      color: var(--muted);
+      text-decoration: underline;
+      background: none;
+      border: none;
+      cursor: pointer;
+      font-family: 'Nunito', sans-serif;
+      padding: 4px;
+    }
+    .change-shift-link:hover { color: var(--green); }
+
+    /* ── Filter bar ───────────────────────────────────────── */
+    .filter-bar {
+      background: white;
+      border-bottom: 2px solid var(--border);
+      padding: 10px 20px;
+      overflow-x: auto;
+    }
+    .filter-bar-inner {
+      max-width: 1400px;
+      margin: 0 auto;
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+    .filter-btn {
+      min-height: 44px;
+      padding: 8px 20px;
+      border-radius: 22px;
+      border: 2px solid var(--border);
+      background: white;
+      font-family: 'Nunito', sans-serif;
+      font-size: 18px;
+      font-weight: 700;
+      cursor: pointer;
+      white-space: nowrap;
+      transition: all 0.15s;
+      color: var(--text);
+    }
+    .filter-btn:hover,
+    .filter-btn.active {
+      background: var(--green);
+      color: white;
+      border-color: var(--green);
+    }
+
+    /* ══════════════════════════════════════════════════════ */
+    /* VIEW: Shift Log — dog cards                            */
+    /* ══════════════════════════════════════════════════════ */
+    .log-grid {
+      width: min(92%, 1400px);
+      margin: 24px auto 80px;
+      padding: 0 20px;
+      display: flex;
+      flex-direction: column;
+      gap: 24px;
+    }
+    .log-loading {
+      text-align: center;
+      padding: 40px;
+      color: var(--muted);
+      font-size: 20px;
+    }
+
+    .dog-card {
+      background: white;
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      border: 2px solid var(--border);
+      overflow: hidden;
+    }
+    .dog-card.filtered-out { display: none; }
+
+    .dog-card-header {
+      padding: 14px 20px;
+      background: #edeae6;
+      border-bottom: 2px solid var(--border);
+    }
+    .dog-card-header.colour-G { background: #dcfce7; border-bottom-color: #86efac; }
+    .dog-card-header.colour-Y { background: #fef9c3; border-bottom-color: #fde047; }
+    .dog-card-header.colour-O { background: #ffedd5; border-bottom-color: #fdba74; }
+    .dog-card-header.colour-R { background: #fee2e2; border-bottom-color: #fca5a5; }
+    .dog-card-header-main {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      gap: 10px;
+    }
+    .dog-card-colour-row {
+      display: flex;
+      align-items: flex-start;
+      gap: 8px;
+      margin-top: 8px;
+      font-size: 17px;
+      font-weight: 700;
+    }
+    .colour-G .dog-card-colour-row { color: #166534; }
+    .colour-Y .dog-card-colour-row { color: #854d0e; }
+    .colour-O .dog-card-colour-row { color: #9a3412; }
+    .colour-R .dog-card-colour-row { color: #991b1b; }
+    .dog-card-name {
+      font-size: 26px;
+      font-weight: 900;
+      color: var(--text);
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+    .dog-photo-thumb {
+      width: 48px;
+      height: 48px;
+      border-radius: 50%;
+      object-fit: cover;
+      border: 2px solid var(--border);
+      flex-shrink: 0;
+    }
+    .dog-card-header-main { gap: 12px; }
+    .dog-card-name-row {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+    .dog-photo-thumb-sm {
+      width: 32px;
+      height: 32px;
+      border-radius: 50%;
+      object-fit: cover;
+      border: 2px solid var(--border);
+      flex-shrink: 0;
+    }
+    /* Photo upload in edit form */
+    .photo-upload-section {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      padding: 14px 0;
+      border-bottom: 1px solid var(--border);
+      margin-bottom: 4px;
+    }
+    .photo-preview-circle {
+      width: 64px;
+      height: 64px;
+      border-radius: 50%;
+      object-fit: cover;
+      border: 2px solid var(--border);
+      flex-shrink: 0;
+      background: var(--bg);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 28px;
+      overflow: hidden;
+    }
+    .photo-preview-circle img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      border-radius: 50%;
+    }
+    /* Dog details panel — side-by-side layout */
+    .dog-card-inner {
+      display: flex;
+      align-items: stretch;
+    }
+    .dog-details-panel {
+      flex: 0 0 42%;
+      min-width: 280px;
+      padding: 20px;
+      background:
+        linear-gradient(transparent, #fafaf8 55%) center bottom / 100% 80px no-repeat local,
+        linear-gradient(transparent, rgba(0,0,0,.13)) center bottom / 100% 44px no-repeat scroll,
+        #fafaf8;
+      border-right: 2px solid var(--border);
+      overflow-y: auto;
+      max-height: 600px;
+    }
+    .dog-fields-side {
+      flex: 1;
+      min-width: 0;
+      display: flex;
+      flex-direction: column;
+      position: relative;
+      overflow: hidden;
+    }
+    .dog-details-panel {
+      pointer-events: auto;
+      overflow-y: auto;
+    }
+    @media (max-width: 700px) {
+      .dog-card-inner { flex-direction: column; }
+      .dog-details-panel {
+        border-right: none;
+        border-bottom: 2px solid var(--border);
+        min-width: 0;
+        max-height: none;
+      }
+    }
+    .details-basic-grid {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px 24px;
+      margin-bottom: 16px;
+      padding-bottom: 14px;
+      border-bottom: 1px solid var(--border);
+    }
+    .details-basic-item { flex: 0 0 auto; }
+    .details-basic-label {
+      font-size: 12px;
+      font-weight: 800;
+      text-transform: uppercase;
+      letter-spacing: 0.8px;
+      color: var(--muted);
+      margin-bottom: 1px;
+    }
+    .details-basic-value { font-size: 16px; }
+
+    .details-section {
+      margin-bottom: 14px;
+      break-inside: avoid;
+      border-top: 1px solid var(--border);
+      padding-top: 12px;
+    }
+    .details-section:last-child { margin-bottom: 0; }
+    .details-section-label {
+      font-size: 12px;
+      font-weight: 800;
+      text-transform: uppercase;
+      letter-spacing: 0.8px;
+      color: var(--muted);
+      display: block;
+      margin-bottom: 6px;
+    }
+    .details-section-value {
+      font-size: 18px;
+      line-height: 1.6;
+      white-space: pre-line;
+      color: var(--text);
+    }
+    .details-feeding-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 12px;
+      margin-bottom: 20px;
+    }
+    .details-feeding-item {
+      background: white;
+      border-radius: 8px;
+      padding: 12px;
+      border: 1px solid var(--border);
+    }
+
+    /* Dog card input area */
+    .dog-fields-row {
+      display: grid;
+      grid-template-columns: 110px 1fr 1fr 1fr;
+      gap: 16px;
+      padding: 20px 20px 0;
+    }
+    .field-group { display: flex; flex-direction: column; }
+
+    .comments-row {
+      padding: 16px 20px 20px;
+      position: relative;
+    }
+    .comments-rich-editor {
+      min-height: 180px;
+      border: 2px solid var(--border);
+      border-radius: var(--radius);
+      padding: 10px 14px;
+      font-family: 'Nunito', sans-serif;
+      font-size: 19px;
+      line-height: 1.5;
+      background: white;
+      outline: none;
+      cursor: text;
+    }
+    .comments-rich-editor:focus { border-color: var(--green); }
+    .comments-toolbar {
+      display: flex;
+      gap: 4px;
+      margin-bottom: 6px;
+    }
+    .comments-toolbar .rt-btn {
+      min-height: 32px;
+      padding: 4px 10px;
+      font-size: 15px;
+    }
+    .save-status {
+      display: block;
+      margin-top: 6px;
+      font-size: 16px;
+      font-weight: 700;
+      min-height: 22px;
+    }
+    .save-status.saving { color: var(--amber); }
+    .save-status.saved  { color: var(--green-dark); }
+    .save-status.error  { color: var(--red); }
+
+    @media (max-width: 640px) {
+      .dog-fields-row {
+        grid-template-columns: repeat(2, 1fr);
+      }
+    }
+
+    /* ══════════════════════════════════════════════════════ */
+    /* VIEW: History                                          */
+    /* ══════════════════════════════════════════════════════ */
+    .view-inner {
+      max-width: 960px;
+      margin: 0 auto;
+      padding: 24px 20px 80px;
+    }
+    .back-header {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      margin-bottom: 24px;
+      flex-wrap: wrap;
+    }
+    .back-header h2 { font-size: 28px; font-weight: 900; }
+
+    .mode-toggle {
+      display: flex;
+      gap: 12px;
+      margin-bottom: 24px;
+      flex-wrap: wrap;
+    }
+    .mode-btn {
+      min-height: 48px;
+      padding: 10px 24px;
+      border-radius: 8px;
+      border: 3px solid var(--border);
+      background: white;
+      font-family: 'Nunito', sans-serif;
+      font-size: 20px;
+      font-weight: 700;
+      cursor: pointer;
+      transition: all 0.15s;
+      color: var(--text);
+    }
+    .mode-btn.active,
+    .mode-btn:hover {
+      border-color: var(--green);
+      background: var(--green-light);
+      color: var(--green-dark);
+    }
+
+    /* Date navigator */
+    .date-nav {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 20px;
+      flex-wrap: wrap;
+    }
+    .date-nav-btn {
+      min-height: 52px;
+      padding: 10px 20px;
+      border-radius: 8px;
+      border: 2px solid var(--border);
+      background: white;
+      font-family: 'Nunito', sans-serif;
+      font-size: 22px;
+      font-weight: 800;
+      cursor: pointer;
+      transition: all 0.15s;
+      color: var(--text);
+    }
+    .date-nav-btn:hover { background: var(--green-light); border-color: var(--green); }
+    .date-nav-label {
+      font-size: 22px;
+      font-weight: 800;
+      flex: 1 1 auto;
+      text-align: center;
+    }
+
+    /* History table */
+    .history-table-wrap {
+      overflow-x: auto;
+      border-radius: var(--radius);
+      border: 2px solid var(--border);
+      margin-top: 8px;
+    }
+    .history-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 18px;
+      background: white;
+    }
+    .history-table th {
+      background: var(--green-light);
+      font-weight: 800;
+      padding: 14px 16px;
+      text-align: left;
+      border-bottom: 2px solid var(--border);
+      white-space: nowrap;
+    }
+    .history-table td {
+      padding: 12px 16px;
+      border-bottom: 1px solid var(--border);
+      vertical-align: top;
+    }
+    .history-table tbody tr:last-child td { border-bottom: none; }
+    .history-table tbody tr:hover td { background: #fafaf8; }
+
+    .hist-summary { font-size: 16px; line-height: 1.7; }
+    .hist-comment-short {
+      color: var(--muted);
+      font-size: 15px;
+      cursor: pointer;
+      display: -webkit-box;
+      -webkit-line-clamp: 2;
+      -webkit-box-orient: vertical;
+      overflow: hidden;
+    }
+    .hist-comment-short.expanded {
+      display: block;
+      -webkit-line-clamp: unset;
+    }
+    .hist-empty { color: var(--muted); font-size: 18px; }
+    .hist-edit-btn {
+      font-size: 15px;
+      color: var(--green);
+      background: none;
+      border: none;
+      cursor: pointer;
+      font-family: 'Nunito', sans-serif;
+      font-weight: 700;
+      text-decoration: underline;
+      padding: 0;
+      display: block;
+      margin-top: 6px;
+    }
+    .hist-add-btn {
+      font-size: 15px;
+      color: var(--muted);
+      background: none;
+      border: 1px dashed var(--border);
+      border-radius: 6px;
+      padding: 4px 10px;
+      cursor: pointer;
+      font-family: 'Nunito', sans-serif;
+      font-weight: 700;
+    }
+    .hist-add-btn:hover { border-color: var(--green); color: var(--green); }
+
+    /* ── Colour banner ────────────────────────────────────── */
+    .colour-banner {
+      display: flex;
+      align-items: flex-start;
+      gap: 10px;
+      padding: 10px 20px;
+      font-size: 18px;
+      font-weight: 700;
+      line-height: 1.4;
+      border-bottom: 2px solid var(--border);
+    }
+    .colour-banner.colour-R { background: #fee2e2; color: #991b1b; border-bottom-color: #fca5a5; }
+    .colour-banner.colour-O { background: #ffedd5; color: #9a3412; border-bottom-color: #fdba74; }
+    .colour-banner.colour-Y { background: #fef9c3; color: #854d0e; border-bottom-color: #fde047; }
+    .colour-banner.colour-G { background: #dcfce7; color: #166534; border-bottom-color: #86efac; }
+    .colour-dot {
+      width: 18px;
+      height: 18px;
+      border-radius: 50%;
+      flex-shrink: 0;
+      margin-top: 3px;
+    }
+    .colour-G .colour-dot { background: #22c55e; }
+    .colour-Y .colour-dot { background: #eab308; }
+    .colour-O .colour-dot { background: #f97316; }
+    .colour-R .colour-dot { background: #ef4444; }
+
+    /* ── Rich text toolbar ────────────────────────────────── */
+    .rich-toolbar {
+      display: flex;
+      gap: 6px;
+      margin-bottom: 6px;
+    }
+    .rt-btn {
+      min-height: 36px;
+      min-width: 36px;
+      padding: 4px 10px;
+      border: 2px solid var(--border);
+      border-radius: 6px;
+      background: white;
+      font-family: 'Nunito', sans-serif;
+      font-size: 17px;
+      cursor: pointer;
+      color: var(--text);
+      line-height: 1;
+    }
+    .rt-btn:hover { background: var(--green-light); border-color: var(--green); }
+    .rich-editor {
+      width: 100%;
+      min-height: 100px;
+      padding: 10px 14px;
+      border: 2px solid var(--border);
+      border-radius: 8px;
+      font-family: 'Nunito', sans-serif;
+      font-size: 20px;
+      color: var(--text);
+      background: white;
+      line-height: 1.5;
+      outline: none;
+      transition: border-color 0.15s, box-shadow 0.15s;
+    }
+    .rich-editor:focus {
+      border-color: var(--green);
+      box-shadow: 0 0 0 3px rgba(74,124,89,0.2);
+    }
+
+    /* ── Form section dividers ───────────────────────────── */
+    .form-divider {
+      grid-column: 1 / -1;
+      border-top: 2px solid var(--border);
+      padding-top: 10px;
+      margin-top: 4px;
+    }
+    .form-section-label {
+      font-size: 14px;
+      font-weight: 800;
+      text-transform: uppercase;
+      letter-spacing: 0.8px;
+      color: var(--muted);
+    }
+
+    /* Dog selector for by-dog mode */
+    .dog-selector {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      margin-bottom: 20px;
+    }
+
+    /* Load more */
+    .load-more-row {
+      text-align: center;
+      padding: 20px;
+    }
+
+    /* ══════════════════════════════════════════════════════ */
+    /* History edit drawer (admin)                            */
+    /* ══════════════════════════════════════════════════════ */
+    .drawer {
+      position: fixed;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      background: white;
+      border-top: 4px solid var(--green);
+      box-shadow: 0 -4px 24px rgba(0,0,0,0.15);
+      z-index: 300;
+      max-height: 75vh;
+      overflow-y: auto;
+    }
+    .drawer-inner {
+      max-width: 900px;
+      margin: 0 auto;
+      padding: 24px 20px;
+    }
+    .drawer-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 20px;
+      flex-wrap: wrap;
+      gap: 12px;
+    }
+    .drawer-header h3 {
+      font-size: 22px;
+      font-weight: 900;
+      color: var(--green-dark);
+    }
+    .drawer-fields {
+      display: grid;
+      grid-template-columns: 110px 1fr 1fr 1fr;
+      gap: 16px;
+      margin-bottom: 16px;
+    }
+    @media (max-width: 640px) {
+      .drawer-fields { grid-template-columns: repeat(2, 1fr); }
+    }
+
+    /* ══════════════════════════════════════════════════════ */
+    /* VIEW: Dog Management                                   */
+    /* ══════════════════════════════════════════════════════ */
+    .dog-mgmt-list {
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+      margin-bottom: 24px;
+    }
+    .dog-mgmt-card {
+      background: white;
+      border-radius: var(--radius);
+      border: 2px solid var(--border);
+      padding: 16px 20px;
+      display: flex;
+      flex-direction: column;
+      align-items: flex-start;
+      gap: 10px;
+    }
+    .dog-mgmt-card.inactive { opacity: 0.65; }
+    .dog-mgmt-card.editing {
+      border-color: var(--green);
+      border-bottom-left-radius: 0;
+      border-bottom-right-radius: 0;
+    }
+    .dog-mgmt-info { width: 100%; }
+    .dog-mgmt-name {
+      font-size: 22px;
+      font-weight: 800;
+    }
+    .dog-mgmt-meta { font-size: 17px; color: var(--muted); }
+    .status-badge {
+      display: inline-block;
+      padding: 3px 12px;
+      border-radius: 20px;
+      font-size: 15px;
+      font-weight: 800;
+    }
+    .status-badge.active   { background: var(--green-light); color: var(--green-dark); }
+    .status-badge.inactive { background: #f0ede9; color: #5a4f4b; }
+    .dog-mgmt-actions { display: flex; gap: 10px; flex-wrap: wrap; }
+
+    /* Dog profile form */
+    .dog-form-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 16px;
+      margin-bottom: 16px;
+    }
+    .dog-form-grid .full-width { grid-column: 1 / -1; }
+    @media (max-width: 640px) {
+      .dog-form-grid { grid-template-columns: 1fr; }
+      .dog-form-grid .full-width { grid-column: auto; }
+    }
+
+    /* ══════════════════════════════════════════════════════ */
+    /* Confirmation modal                                     */
+    /* ══════════════════════════════════════════════════════ */
+    .modal-overlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(44,40,37,0.5);
+      z-index: 400;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+    }
+    .modal-box {
+      background: white;
+      border-radius: var(--radius);
+      padding: 36px 32px;
+      max-width: 460px;
+      width: 100%;
+      box-shadow: 0 8px 32px rgba(0,0,0,0.2);
+    }
+    .modal-message {
+      font-size: 22px;
+      font-weight: 700;
+      margin-bottom: 28px;
+      line-height: 1.4;
+    }
+    .modal-buttons {
+      display: flex;
+      gap: 14px;
+      flex-wrap: wrap;
+    }
+
+    /* ── Alerts banner ───────────────────────────────────── */
+    .alerts-banner {
+      max-width: 960px;
+      margin: 16px auto 0;
+      padding: 0 20px;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+    .alert-cat-ADOPTION    { --cat-color: #0f766e; --cat-bg: #f0fdfa; }
+    .alert-cat-FOSTER      { --cat-color: #6d28d9; --cat-bg: #f5f3ff; }
+    .alert-cat-BEHAVIOUR   { --cat-color: #c2410c; --cat-bg: #fff7ed; }
+    .alert-cat-OPERATIONS  { --cat-color: #1d4ed8; --cat-bg: #eff6ff; }
+    .alert-cat-MEDICAL     { --cat-color: #b91c1c; --cat-bg: #fef2f2; }
+    .alert-cat-TRAINING    { --cat-color: #15803d; --cat-bg: #f0fdf4; }
+    .alert-cat-GENERAL     { --cat-color: #92400e; --cat-bg: #fffbeb; }
+    .alert-cat-badge {
+      display: inline-block;
+      font-size: 11px;
+      font-weight: 800;
+      letter-spacing: .06em;
+      text-transform: uppercase;
+      color: var(--cat-color, #92400e);
+      margin-bottom: 5px;
+    }
+    .alert-card {
+      border-radius: var(--radius);
+      padding: 14px 18px;
+      display: flex;
+      align-items: flex-start;
+      gap: 14px;
+    }
+    .alert-card-body { flex: 1 1 auto; }
+    .alert-card-msg {
+      font-size: 18px;
+      font-weight: 700;
+      color: var(--cat-color, #92400e);
+      line-height: 1.5;
+    }
+    .alert-card-meta {
+      font-size: 14px;
+      color: var(--cat-color, #92400e);
+      margin-top: 4px;
+    }
+    .alert-dismiss-btn {
+      background: none;
+      border: 2px solid var(--cat-color, #92400e);
+      border-radius: 6px;
+      color: var(--cat-color, #92400e);
+      font-family: 'Nunito', sans-serif;
+      font-size: 15px;
+      font-weight: 700;
+      padding: 4px 12px;
+      cursor: pointer;
+      white-space: nowrap;
+      flex-shrink: 0;
+    }
+    .alert-dismiss-btn:hover {
+      background: var(--cat-color, #92400e);
+      color: white;
+    }
+    .alert-dismiss-btn:focus-visible {
+      outline: 2px solid var(--cat-color, #92400e);
+      outline-offset: 2px;
+    }
+    .alert-dismiss-btn:focus:not(:focus-visible) { outline: none; }
+    .alert-outgoing-label {
+      font-size: 13px;
+      font-weight: 800;
+      color: var(--muted);
+      letter-spacing: .06em;
+      text-transform: uppercase;
+      padding: 4px 0 2px;
+    }
+
+    /* ── Post alert panel ────────────────────────────────── */
+    .post-alert-panel {
+      max-width: 960px;
+      margin: 12px auto 0;
+      padding: 0 20px;
+    }
+    .post-alert-inner {
+      background: white;
+      border: 2px solid var(--border);
+      border-radius: var(--radius);
+      padding: 18px 20px;
+    }
+    .post-alert-inner h4 {
+      font-size: 18px;
+      font-weight: 800;
+      margin-bottom: 12px;
+      color: var(--text);
+    }
+    .post-alert-note {
+      font-size: 15px;
+      color: var(--muted);
+      margin-bottom: 10px;
+    }
+    .post-alert-row {
+      display: flex;
+      gap: 12px;
+      flex-wrap: wrap;
+      align-items: flex-end;
+      margin-top: 10px;
+    }
+    .post-alert-row .field-group { flex: 1 1 200px; }
+
+    /* ── Manage dogs section divider ─────────────────────── */
+    .mgmt-section-divider {
+      font-size: 15px;
+      font-weight: 800;
+      text-transform: uppercase;
+      letter-spacing: 0.8px;
+      color: var(--muted);
+      padding: 20px 0 10px;
+      border-top: 2px solid var(--border);
+      margin-top: 8px;
+    }
+
+    /* ── Respite overlay ─────────────────────────────────── */
+    .dog-card.on-respite .dog-card-header {
+      background: #e2e8f0 !important;
+      border-bottom-color: #cbd5e1 !important;
+    }
+    .respite-overlay {
+      position: absolute;
+      inset: 0;
+      background: rgba(226, 232, 240, 0.97);
+      z-index: 5;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 12px;
+      padding: 24px;
+      text-align: center;
+    }
+    .respite-overlay-title {
+      font-size: 22px;
+      font-weight: 900;
+      color: #334155;
+    }
+    .respite-overlay-until {
+      font-size: 17px;
+      font-weight: 700;
+      color: #64748b;
+    }
+    .log-lock-overlay {
+      position: absolute;
+      inset: 0;
+      background: rgba(239, 246, 255, 0.97);
+      z-index: 5;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 24px;
+      text-align: center;
+      border-left: 4px solid #93c5fd;
+    }
+    .log-lock-msg {
+      font-size: 18px;
+      font-weight: 700;
+      color: #1e40af;
+      line-height: 1.5;
+    }
+    /* Locked edit button in manage view */
+    .btn-edit.btn-locked {
+      opacity: 0.55;
+      cursor: not-allowed;
+    }
+
+    /* ── Dog form panel (in-place edit) ─────────────────── */
+    #dog-form-panel {
+      background: #f0f7f1;
+      border: 2px solid var(--green);
+      border-radius: var(--radius);
+      padding: 0 20px;
+      max-height: 0;
+      overflow: hidden;
+      opacity: 0;
+      transition:
+        max-height 0.38s cubic-bezier(0.4, 0, 0.2, 1),
+        opacity 0.22s ease,
+        padding 0.38s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+    #dog-form-panel.open {
+      max-height: 4000px;
+      opacity: 1;
+      padding: 20px;
+    }
+    #dog-form-panel.connected {
+      border-top: none;
+      border-top-left-radius: 0;
+      border-top-right-radius: 0;
+      margin-top: -14px;
+    }
+    .status-badge.foster  { background: #f5f3ff; color: #6d28d9; }
+    .status-badge.adopted { background: #f0fdf4; color: #15803d; }
+    .status-badge.incoming { background: #eff6ff; color: #1d4ed8; }
+    .departed-section-header {
+      font-size: 15px;
+      font-weight: 800;
+      text-transform: uppercase;
+      letter-spacing: 0.8px;
+      color: var(--muted);
+      padding: 20px 0 10px;
+      border-top: 2px solid var(--border);
+      margin-top: 8px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .departed-section-header:hover { color: var(--text); }
+    .departed-dog-item {
+      background: white;
+      border-radius: var(--radius);
+      border: 2px solid var(--border);
+      padding: 14px 20px;
+      margin-bottom: 10px;
+      opacity: 0.65;
+    }
+    .departed-dog-name {
+      font-size: 20px;
+      font-weight: 800;
+      color: var(--text);
+    }
+
+    /* ── Checkbox fields in dog form ─────────────────────── */
+    .checkbox-group {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      min-height: 48px;
+    }
+    .checkbox-group input[type="checkbox"] {
+      width: 24px;
+      height: 24px;
+      min-height: unset;
+      flex-shrink: 0;
+      cursor: pointer;
+      accent-color: var(--green);
+    }
+    .checkbox-group label {
+      font-size: 18px;
+      font-weight: 700;
+      cursor: pointer;
+    }
+
+    /* ── Test Panel ─────────────────────────────────────────── */
+    #view-test .test-topbar {
+      display: flex; align-items: center; gap: 12px;
+      padding: 16px 20px; border-bottom: 1px solid var(--border);
+      position: sticky; top: 0; background: #fff; z-index: 10;
+    }
+    #view-test .test-topbar h2 { margin: 0; flex: 1; font-size: 20px; }
+    #test-results { list-style: none; padding: 0 20px; margin: 0; }
+    .test-section-label {
+      font-size: 11px; font-weight: 800; letter-spacing: .08em;
+      text-transform: uppercase; color: var(--muted);
+      margin: 20px 0 6px; padding-bottom: 4px;
+      border-bottom: 1px solid var(--border);
+    }
+    .test-item {
+      display: flex; align-items: flex-start; gap: 10px;
+      padding: 9px 0; font-size: 15px;
+      border-bottom: 1px solid #f0ece9; line-height: 1.4;
+    }
+    .test-item:last-of-type { border-bottom: none; }
+    .test-icon { flex-shrink: 0; width: 20px; font-style: normal; }
+    .test-name { flex: 1; }
+    .test-detail { font-size: 13px; color: var(--red, #991b1b); margin-top: 2px; }
+    .test-item.pass .test-icon::before { content: "✓"; color: #166534; font-weight: 800; }
+    .test-item.fail .test-icon::before { content: "✗"; color: #991b1b; font-weight: 800; }
+    .test-summary {
+      margin: 16px 20px 24px; padding: 14px 18px;
+      border-radius: 10px; font-weight: 700; font-size: 16px;
+    }
+    .test-summary.all-pass { background: #dcfce7; color: #166534; }
+    .test-summary.has-fail { background: #fee2e2; color: #991b1b; }
+
+    /* ══════════════════════════════════════════════════════ */
+    /* Mobile: 480px and below (phones)                       */
+    /* ══════════════════════════════════════════════════════ */
+    @media (max-width: 480px) {
+      /* Tighter view padding */
+      .view-inner { padding: 16px 12px 80px; }
+
+      /* Header: logo+badge on first line, nav scrolls on its own row */
+      .app-header { padding: 10px 12px; }
+      .header-logo { font-size: 18px; }
+      .header-badge { font-size: 14px; }
+      .header-nav {
+        width: 100%;
+        flex-wrap: nowrap;
+        overflow-x: auto;
+        gap: 6px;
+        padding-bottom: 2px;
+      }
+      .header-nav .btn-sm { font-size: 14px; padding: 5px 10px; white-space: nowrap; }
+      .change-shift-link { font-size: 14px; white-space: nowrap; }
+
+      /* Shift select card */
+      .shift-card { padding: 32px 20px; }
+
+      /* Filter bar: single scrollable row instead of wrapping */
+      .filter-bar { padding: 8px 12px; }
+      .filter-bar-inner { flex-wrap: nowrap; overflow-x: auto; gap: 8px; }
+      .filter-btn { font-size: 16px; padding: 6px 14px; white-space: nowrap; }
+
+      /* Log card fields: single column on phone */
+      .dog-fields-row {
+        grid-template-columns: 1fr 1fr;
+        gap: 12px;
+        padding: 14px 14px 0;
+      }
+
+      /* Shrink comments box on phone */
+      .comments-rich-editor { min-height: 90px; font-size: 17px; }
+      .comments-row { padding: 12px 14px 14px; }
+
+      /* Manage dogs: ensure button row wraps cleanly */
+      .dog-mgmt-card { padding: 14px 14px; }
+      .dog-mgmt-actions { gap: 8px; }
+      .dog-mgmt-name { font-size: 20px; }
+
+      /* Respite section cards */
+      .respite-card { padding: 14px; }
+
+      /* History view table: allow horizontal scroll */
+      .history-table-wrap, .history-table { display: block; overflow-x: auto; }
+
+      /* Alert cards */
+      .alert-card { padding: 14px 16px; }
+
+      /* Back header */
+      .back-header h2 { font-size: 22px; }
+      .back-header { gap: 10px; margin-bottom: 16px; }
+
+      /* Form modals */
+      .modal-box { padding: 24px 20px; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- ══════════════════════════════════════════════════════════
+     VIEW: Login
+     ══════════════════════════════════════════════════════════ -->
+<div id="view-login" class="hidden">
+  <div class="shift-card" style="max-width:440px;">
+    <div class="shift-card-logo">EHS Dog Log</div>
+    <p style="color:var(--muted);font-size:18px;margin-bottom:28px;">Enter your email to sign in</p>
+    <div id="login-error" class="hidden" style="background:#fdf2f1;border:2px solid #f5a4a4;border-radius:10px;padding:14px 18px;margin-bottom:20px;color:#c0392b;font-size:17px;font-weight:700;"></div>
+    <div id="login-form">
+      <input id="login-email" type="email" placeholder="your@email.com"
+        style="width:100%;padding:14px 16px;font-size:20px;font-family:'Nunito',sans-serif;border:2px solid var(--border);border-radius:10px;margin-bottom:16px;outline:none;"
+        onkeydown="if(event.key==='Enter')submitLogin()">
+      <button class="btn btn-primary" style="width:100%;" onclick="submitLogin()">Send me a sign-in link</button>
+    </div>
+    <div id="login-sent" class="hidden" style="text-align:center;padding:12px 0;">
+      <div style="font-size:40px;margin-bottom:12px;">📬</div>
+      <p style="font-weight:800;font-size:20px;margin-bottom:8px;">Check your email!</p>
+      <p id="login-sent-msg" style="color:var(--muted);font-size:17px;word-break:break-all;"></p>
+      <button class="btn btn-secondary" style="margin-top:24px;width:100%;" onclick="resetLogin()">Use a different email</button>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════════════════════
+     VIEW: Shift Selector
+     ══════════════════════════════════════════════════════════ -->
+<div id="view-shift-select" class="hidden">
+  <div class="shift-card">
+    <div class="shift-card-logo">EHS Dog Log</div>
+    <div class="shift-card-date" id="shift-date-display"></div>
+    <div class="shift-card-prompt">Which shift are you starting?</div>
+    <div class="shift-buttons" id="shift-buttons-container"></div>
+    <div id="shift-select-admin" class="hidden" style="margin-top:28px;padding-top:24px;border-top:2px solid var(--border);display:flex;flex-direction:column;gap:10px;">
+      <button class="btn btn-secondary" style="width:100%;" onclick="handleAlertBtn()">📢 Manage Alerts</button>
+      <button class="btn btn-secondary admin-only hidden" style="width:100%;" onclick="openManage()">🐶 Manage Dogs</button>
+    </div>
+  </div>
+</div>
+
+
+<!-- ══════════════════════════════════════════════════════════
+     VIEW: Shift Log
+     ══════════════════════════════════════════════════════════ -->
+<div id="view-log" class="hidden">
+  <div class="app-header">
+    <div class="header-inner">
+      <span class="header-logo">EHS Dog Log</span>
+      <span class="header-badge" id="log-header-badge"></span>
+      <div class="header-nav">
+        <button class="btn btn-secondary btn-sm" onclick="openHistory()">History</button>
+        <button class="btn btn-secondary btn-sm" id="alert-nav-btn" onclick="handleAlertBtn()">📢 Leave note for next shift</button>
+        <button class="btn btn-secondary btn-sm admin-only hidden" onclick="openManage()">🐶 Manage Dogs</button>
+        <button class="change-shift-link" onclick="changeShift()">Change shift</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="filter-bar" id="filter-bar">
+    <div class="filter-bar-inner" id="filter-bar-inner"></div>
+  </div>
+
+  <!-- Post alert panel (hidden until toggled) -->
+  <div class="post-alert-panel hidden" id="post-alert-panel">
+    <div class="post-alert-inner">
+      <h4>📢 Post a Shift Alert</h4>
+      <p class="post-alert-note" id="post-alert-note"></p>
+      <div class="field-group">
+        <label class="field-label" for="alert-message">Message</label>
+        <textarea id="alert-message" rows="3" placeholder="We did not finish the laundry, please run the dryer"></textarea>
+      </div>
+      <div class="post-alert-row">
+        <div class="field-group hidden" id="alert-expiry-group">
+          <label class="field-label" for="alert-expiry">Visible until (date)</label>
+          <input type="date" id="alert-expiry">
+        </div>
+        <div style="display:flex; gap:10px; align-items:flex-end; flex-wrap:wrap;">
+          <button class="btn btn-primary btn-sm" onclick="submitAlert()">Post Alert</button>
+          <button class="btn btn-secondary btn-sm" onclick="togglePostAlertPanel()">Cancel</button>
+        </div>
+      </div>
+      <div id="alert-post-status" style="margin-top:8px;font-size:16px;font-weight:700;min-height:20px;"></div>
+    </div>
+  </div>
+
+  <!-- Active alerts banner -->
+  <div class="alerts-banner hidden" id="alerts-banner"></div>
+
+  <div class="log-grid" id="log-grid">
+    <div class="log-loading">
+      <span class="spinner"></span> Loading today's log&hellip;
+    </div>
+  </div>
+</div>
+
+
+<!-- ══════════════════════════════════════════════════════════
+     VIEW: History
+     ══════════════════════════════════════════════════════════ -->
+<div id="view-history" class="hidden">
+  <div class="view-inner">
+    <div class="back-header">
+      <button class="btn btn-secondary btn-sm" onclick="returnToLog()">&#8592; Back</button>
+      <h2>Log History</h2>
+    </div>
+
+    <div class="mode-toggle">
+      <button class="mode-btn active" id="mode-btn-bydate" onclick="switchHistoryMode('byDate')">
+        All Dogs by Date
+      </button>
+      <button class="mode-btn" id="mode-btn-bydog" onclick="switchHistoryMode('byDog')">
+        One Dog Over Time
+      </button>
+    </div>
+
+    <!-- Mode A: By Date -->
+    <div id="history-bydate">
+      <div class="date-nav">
+        <button class="date-nav-btn" onclick="navigateHistoryDate(-1)">&#8592; Previous</button>
+        <span class="date-nav-label" id="hist-date-label"></span>
+        <button class="date-nav-btn" onclick="navigateHistoryDate(1)">Next &#8594;</button>
+      </div>
+      <div id="hist-date-table-wrap"></div>
+    </div>
+
+    <!-- Mode B: By Dog -->
+    <div id="history-bydog" class="hidden">
+      <div class="dog-selector" id="hist-dog-selector"></div>
+      <div id="hist-dog-table-wrap"></div>
+      <div class="load-more-row hidden" id="hist-load-more-row">
+        <button class="btn btn-secondary" onclick="loadMoreDogHistory()">
+          Load 14 more days
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+
+
+<!-- ══════════════════════════════════════════════════════════
+     VIEW: Dog Management (admin only)
+     ══════════════════════════════════════════════════════════ -->
+<div id="view-manage" class="hidden">
+  <div class="view-inner">
+    <div class="back-header">
+      <button class="btn btn-secondary btn-sm" onclick="backFromManage()">&#8592; Back</button>
+      <h2>Manage Dogs</h2>
+      <button class="btn btn-primary btn-sm" onclick="openDogForm(null)">+ Add New Dog</button>
+    </div>
+
+    <!-- Dog list -->
+    <div id="dog-mgmt-list"></div>
+
+    <!-- Add / Edit form (hidden until triggered, moves inline when editing) -->
+    <div id="dog-form-panel">
+      <h3 class="section-title" id="dog-form-title">Add New Dog</h3>
+      <div class="dog-form-grid" id="dog-form-fields"></div>
+      <div id="dog-form-btn-row" style="display:flex; gap:14px; flex-wrap:wrap; margin-top:8px;"></div>
+      <div id="dog-form-status" class="success-msg hidden"></div>
+      <div id="dog-form-error" class="error-msg hidden"></div>
+    </div>
+  </div>
+</div>
+
+
+<!-- ══════════════════════════════════════════════════════════
+     History edit drawer (admin)
+     ══════════════════════════════════════════════════════════ -->
+<div id="history-drawer" class="drawer hidden">
+  <div class="drawer-inner">
+    <div class="drawer-header">
+      <h3 id="drawer-title">Edit log entry</h3>
+      <button class="btn btn-secondary btn-sm" onclick="closeHistoryDrawer()">Close</button>
+    </div>
+    <div class="drawer-fields">
+      <div class="field-group">
+        <label class="field-label" for="drawer-bm">BM (1&ndash;7)</label>
+        <input type="number" id="drawer-bm" min="1" max="7" oninput="triggerDrawerSave()">
+      </div>
+      <div class="field-group">
+        <label class="field-label" for="drawer-med">Medication given?</label>
+        <select id="drawer-med" onchange="triggerDrawerSave()">
+          <option value="">&mdash;</option>
+          <option value="Y">Y &mdash; Yes</option>
+          <option value="N">N &mdash; No</option>
+        </select>
+      </div>
+      <div class="field-group">
+        <label class="field-label" for="drawer-food">Food eaten?</label>
+        <select id="drawer-food" onchange="triggerDrawerSave()">
+          <option value="">&mdash;</option>
+          <option value="Fully Eaten">Fully Eaten</option>
+          <option value="Half Eaten">Half Eaten</option>
+          <option value="Not Eaten">Not Eaten</option>
+        </select>
+      </div>
+      <div class="field-group">
+        <label class="field-label" for="drawer-walk">Walk</label>
+        <input type="text" id="drawer-walk" oninput="triggerDrawerSave()">
+      </div>
+    </div>
+    <div class="field-group" style="margin-bottom:16px;">
+      <label class="field-label" for="drawer-comments">Comments</label>
+      <textarea id="drawer-comments" rows="4" oninput="triggerDrawerSave()"></textarea>
+    </div>
+    <span class="save-status" id="drawer-save-status"></span>
+  </div>
+</div>
+
+
+<!-- ══════════════════════════════════════════════════════════
+     VIEW: Manage Alerts (admin only)
+     ══════════════════════════════════════════════════════════ -->
+<div id="view-alerts" class="hidden">
+  <div class="view-inner">
+    <div class="back-header">
+      <button class="btn btn-secondary btn-sm" onclick="returnToLog()">&#8592; Back</button>
+      <h2>Manage Alerts</h2>
+    </div>
+
+    <!-- Post new alert -->
+    <div class="post-alert-inner" style="margin-bottom:28px;">
+      <h4>📢 Post New Alert</h4>
+      <div class="field-group" style="margin-bottom:12px;">
+        <label class="field-label" for="adm-alert-message">Message</label>
+        <textarea id="adm-alert-message" rows="3" placeholder="Enter alert message…"></textarea>
+      </div>
+      <div style="display:flex; gap:14px; flex-wrap:wrap; margin-bottom:12px;">
+        <div class="field-group" style="flex:1 1 160px;">
+          <label class="field-label" for="adm-alert-category">Category</label>
+          <select id="adm-alert-category">
+            <option value="GENERAL">General</option>
+            <option value="ADOPTION">Adoption</option>
+            <option value="FOSTER">Foster</option>
+            <option value="BEHAVIOUR">Behaviour &amp; Handling</option>
+            <option value="OPERATIONS">Operations</option>
+            <option value="MEDICAL">Medical</option>
+            <option value="TRAINING">Training</option>
+          </select>
+        </div>
+        <div class="field-group" style="flex:1 1 160px;">
+          <label class="field-label" for="adm-alert-shift">Visible to</label>
+          <select id="adm-alert-shift">
+            <option value="ALL">All shifts</option>
+            <option value="AM">Morning only</option>
+            <option value="AFT">Afternoon only</option>
+            <option value="EVE">Evening only</option>
+          </select>
+        </div>
+      </div>
+      <div style="display:flex; gap:14px; flex-wrap:wrap; margin-bottom:14px;">
+        <div class="field-group" style="flex:1 1 140px;">
+          <label class="field-label" for="adm-alert-visible-from">Visible from</label>
+          <input type="date" id="adm-alert-visible-from">
+        </div>
+        <div class="field-group" style="flex:1 1 140px;">
+          <label class="field-label" for="adm-alert-expiry">Visible until</label>
+          <input type="date" id="adm-alert-expiry">
+        </div>
+      </div>
+      <p class="muted" style="font-size:13px;margin-bottom:10px;">To target one specific shift on one date, set both dates to the same day and choose a shift.</p>
+      <div style="display:flex; gap:10px; flex-wrap:wrap;">
+        <button class="btn btn-primary btn-sm" onclick="submitAdminAlert()">Post Alert</button>
+      </div>
+      <div id="adm-alert-status" style="margin-top:10px;font-size:16px;font-weight:700;min-height:20px;"></div>
+    </div>
+
+    <!-- Active alerts list -->
+    <div class="section-title">Active Alerts</div>
+    <div id="alerts-mgmt-list"></div>
+  </div>
+</div>
+
+
+<!-- ══ VIEW: Test Panel (Ctrl+Shift+T) ══════════════════════════ -->
+<div id="view-test" class="hidden">
+  <div class="test-topbar">
+    <button class="btn btn-secondary btn-sm" onclick="closeTestPanel()">&#10005; Close</button>
+    <h2>Test Suite</h2>
+    <button class="btn btn-primary btn-sm" id="run-tests-btn" onclick="runClientTests()">&#9654; Run All</button>
+  </div>
+  <ul id="test-results"></ul>
+  <div id="test-summary" class="test-summary hidden"></div>
+</div>
+
+
+<!-- Profile history modal (admin) -->
+<div id="history-modal" class="modal-overlay hidden" onclick="if(event.target===this)closeHistoryModal()">
+  <div class="modal-box" style="max-width:720px;width:100%;max-height:80vh;overflow-y:auto;">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:20px;flex-wrap:wrap;gap:12px;">
+      <h3 style="font-size:22px;font-weight:900;" id="history-modal-title">Profile History</h3>
+      <button class="btn btn-secondary btn-sm" onclick="closeHistoryModal()">Close</button>
+    </div>
+    <div id="history-modal-body"></div>
+  </div>
+</div>
+
+<!-- Respite modal (admin only) -->
+<div id="respite-modal" class="modal-overlay hidden" onclick="if(event.target===this)closeRespiteModal()">
+  <div class="modal-box" style="max-width:440px;">
+    <h3 style="font-size:20px;font-weight:900;margin-bottom:20px;" id="respite-modal-title">Schedule Respite</h3>
+    <div class="field-group" style="margin-bottom:14px;">
+      <label class="field-label">Start date &amp; time</label>
+      <div style="display:flex;gap:8px;">
+        <input type="date" id="respite-start-date" style="flex:1;">
+        <input type="time" id="respite-start-time" style="flex:1;">
+      </div>
+    </div>
+    <div class="field-group" style="margin-bottom:14px;">
+      <label class="field-label">End date &amp; time</label>
+      <div style="display:flex;gap:8px;">
+        <input type="date" id="respite-end-date" style="flex:1;">
+        <input type="time" id="respite-end-time" style="flex:1;">
+      </div>
+    </div>
+    <div class="field-group" style="margin-bottom:14px;">
+      <label class="field-label" for="respite-notes">Notes (optional)</label>
+      <input type="text" id="respite-notes" placeholder="e.g. Going to the park with Joe">
+    </div>
+    <div style="display:flex;gap:10px;margin-top:12px;flex-wrap:wrap;">
+      <button class="btn btn-primary btn-sm" onclick="submitRespite()">Schedule</button>
+      <button class="btn btn-secondary btn-sm" onclick="closeRespiteModal()">Cancel</button>
+    </div>
+    <div id="respite-modal-status" style="margin-top:8px;font-size:16px;font-weight:700;min-height:20px;"></div>
+  </div>
+</div>
+
+<!-- Confirmation modal -->
+<div id="confirm-modal" class="modal-overlay hidden">
+  <div class="modal-box">
+    <p class="modal-message" id="confirm-message"></p>
+    <div class="modal-buttons">
+      <button class="btn btn-danger" id="confirm-yes-btn">Yes, proceed</button>
+      <button class="btn btn-secondary" onclick="closeConfirm()">Cancel</button>
+    </div>
+  </div>
+</div>
+
+
+<script>
+// ══════════════════════════════════════════════════════════
+// State — initialized from Apps Script scriptlets
+// ══════════════════════════════════════════════════════════
+var state = {
+  today:            "<?= today ?>",
+  todayFormatted:   "<?= todayFormatted ?>",
+  shifts:           <?!= shiftsJson ?>,
+  userEmail:        "<?= userEmail ?>",
+  userRole:         "<?= userRole ?>",
+  tokenError:       "<?= tokenError ?>",
+  sessionEmail:     "",
+  isAdmin:          <?!= isAdmin ?>,
+  isAlertAccess:    <?!= isAlertAccess ?>,
+  isView:           <?!= (typeof isView !== 'undefined' ? isView : false) ?>,
+  canManageAlerts:  <?!= isAdmin ?> || <?!= isAlertAccess ?>,
+  dogs:             <?!= dogsJson ?>,
+  fosterDogs:       <?!= recentDepartedJson ?>.foster,
+  adoptedDogs:      <?!= recentDepartedJson ?>.adopted,
+  respites:         {},   // dogName → {dogName,start,end,notes} (populated below)
+  initialLog:       <?!= initialLogJson ?>,
+  initialLogShift:  "<?= initialLogShift ?>",
+  initialAlerts:    <?!= initialAlertsJson ?>,
+
+  currentShift:   null,
+  currentView:    "shift-select",
+  logData:        {},   // dogName → log entry object
+
+  historyMode:    "byDate",
+  historyDate:    null, // yyyy-MM-dd string
+  historyDog:     null,
+  historyDays:    14,
+  drawerEntry:    null, // { date, shift, dog } for the drawer
+  drawerTimer:    null,
+
+  saveTimers:     {},   // dogName → setTimeout id
+  savingNow:      {},   // dogName → boolean (prevent concurrent saves)
+  logLocks:       {},   // dogName → true (log locks held by current user)
+  lockHeartbeat:  null, // setInterval id for profile form lock renewal
+  lockPollInterval: null, // setInterval id for periodic log-lock poll
+
+  respiteDogForModal: null,  // dogName being scheduled
+  manageDogs:       null, // null = never loaded; [] = loaded empty; populated array = cached
+  manageRespites:   null,
+  alertsReturnView: null, // view to return to when pressing Back from Manage Alerts
+};
+
+// Populate respites lookup from pre-loaded data
+(<?!= respiteJson ?>).forEach(function(r) { state.respites[r.dogName] = r; });
+
+// ══════════════════════════════════════════════════════════
+// Utility
+// ══════════════════════════════════════════════════════════
+function debounce(fn, ms) {
+  var t;
+  return function() {
+    var args = arguments;
+    clearTimeout(t);
+    t = setTimeout(function() { fn.apply(null, args); }, ms);
+  };
+}
+
+function dogId(name) {
+  return name.toLowerCase().replace(/[^a-z0-9]/g, "-");
+}
+
+function esc(str) {
+  return String(str || "")
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;");
+}
+
+function formatDateFull(dateStr) {
+  if (!dateStr) return "";
+  var parts = dateStr.split("-");
+  var d = new Date(parseInt(parts[0]), parseInt(parts[1]) - 1, parseInt(parts[2]));
+  return d.toLocaleDateString("en-CA", {
+    weekday: "long", year: "numeric", month: "long", day: "numeric"
+  });
+}
+
+function addDays(dateStr, n) {
+  var parts = dateStr.split("-");
+  var d = new Date(parseInt(parts[0]), parseInt(parts[1]) - 1, parseInt(parts[2]));
+  d.setDate(d.getDate() + n);
+  var y = d.getFullYear();
+  var m = String(d.getMonth() + 1).padStart(2, "0");
+  var day = String(d.getDate()).padStart(2, "0");
+  return y + "-" + m + "-" + day;
+}
+
+function shiftLabel(key) {
+  for (var i = 0; i < state.shifts.length; i++) {
+    if (state.shifts[i].key === key) return state.shifts[i].label;
+  }
+  return key;
+}
+
+// ══════════════════════════════════════════════════════════
+// View management
+// ══════════════════════════════════════════════════════════
+function showView(name) {
+  var views = ["view-login", "view-shift-select", "view-log", "view-history", "view-manage", "view-alerts", "view-test"];
+  views.forEach(function(id) {
+    document.getElementById(id).classList.add("hidden");
+  });
+  document.getElementById("view-" + name).classList.remove("hidden");
+  state.currentView = name;
+  window.scrollTo(0, 0);
+}
+
+// ══════════════════════════════════════════════════════════
+// Shift Selector
+// ══════════════════════════════════════════════════════════
+function initShiftSelector() {
+  document.getElementById("shift-date-display").textContent = state.todayFormatted;
+
+  if (state.canManageAlerts) {
+    document.getElementById("shift-select-admin").classList.remove("hidden");
+  }
+
+  var suggested = getSuggestedShift();
+  var container = document.getElementById("shift-buttons-container");
+  container.innerHTML = "";
+
+  state.shifts.forEach(function(s) {
+    var btn = document.createElement("button");
+    btn.className = "shift-btn" + (s.key === suggested ? " suggested" : "");
+    btn.innerHTML =
+      "<span class='shift-name'>" + esc(s.label) + "</span>" +
+      "<span class='shift-time'>" + shiftTimeHint(s.key) + "</span>";
+    btn.onclick = function() { selectShift(s.key); };
+    container.appendChild(btn);
+  });
+}
+
+function getSuggestedShift() {
+  var hour = new Date().getHours();
+  var min  = new Date().getMinutes();
+  var t = hour * 60 + min;
+  if (t < 11 * 60)        return "AM";
+  if (t < 18 * 60)        return "AFT";
+  return "EVE";
+}
+
+function shiftTimeHint(key) {
+  if (key === "AM")  return "8 – 11 am";
+  if (key === "AFT") return "1:30 – 3:30 pm";
+  if (key === "EVE") return "6 – 9 pm";
+  return "";
+}
+
+function isShiftStillActive(shiftKey) {
+  var t = new Date().getHours() * 60 + new Date().getMinutes();
+  if (shiftKey === "AM")  return t < 13 * 60;                                  // before 1pm
+  if (shiftKey === "AFT") return t >= 13 * 60 && t < 17 * 60 + 30;            // 1pm–5:30pm
+  if (shiftKey === "EVE") return t >= 17 * 60 + 30 || t < 7 * 60 + 30;        // after 5:30pm or before 7:30am (overnight)
+  return false;
+}
+
+function checkShiftAutoTransition() {
+  if (state.currentView !== "log" || !state.currentShift) return;
+  var t = new Date().getHours() * 60 + new Date().getMinutes();
+  // 30 min before next shift starts: AM@8 → 7:30am, AFT@1:30 → 1:00pm, EVE@6 → 5:30pm
+  if (state.currentShift === "EVE" && t >= 7 * 60 + 30 && t < 12 * 60) { changeShift(); return; }
+  if (state.currentShift === "AM"  && t >= 13 * 60) { changeShift(); return; }
+  if (state.currentShift === "AFT" && t >= 17 * 60 + 30) { changeShift(); return; }
+}
+
+function nextShiftName(key) {
+  if (key === "AM")  return "Afternoon";
+  if (key === "AFT") return "Evening";
+  return "Morning";
+}
+
+function selectShift(key) {
+  state.currentShift = key;
+  localStorage.setItem("ehs_shift", key);
+  localStorage.setItem("ehs_shift_date", state.today);
+  localStorage.setItem("ehs_shift_manual", "1");
+  var label = shiftLabel(key);
+  document.getElementById("log-header-badge").textContent =
+    label + " · " + formatDateFull(state.today);
+
+  // Expiry for non-admin alerts: EVE → tomorrow morning, others → today
+  state.nextShiftExpiry = (key === "EVE") ? addDays(state.today, 1) : state.today;
+
+  // Set up post-alert panel note and expiry field visibility
+  var noteEl    = document.getElementById("post-alert-note");
+  var expiryGrp = document.getElementById("alert-expiry-group");
+  if (state.canManageAlerts) {
+    noteEl.textContent = "Admins can set a multi-day expiry.";
+    expiryGrp.classList.remove("hidden");
+    document.getElementById("alert-expiry").value = addDays(state.today, 1);
+  } else {
+    var dayNote = (key === "EVE") ? " (tomorrow)" : " (today)";
+    noteEl.textContent = "This note will be visible to the " + nextShiftName(key) + " shift" + dayNote + " only.";
+    expiryGrp.classList.add("hidden");
+  }
+
+  buildLogGrid();
+  showView("log");
+  startLockPoll();
+
+  // Use server-pre-loaded data if the user picked the suggested shift — no round trip needed
+  if (key === state.initialLogShift && state.initialLog) {
+    var preloaded = {};
+    state.initialLog.forEach(function(e) { preloaded[e.dogName] = e; });
+    state.logData    = preloaded;
+    state.initialLog = null; // consume once; subsequent refreshes go through GAS
+    populateLogFields(preloaded);
+  } else {
+    fetchAndPopulateLog();
+  }
+
+  // Use pre-loaded alerts for first display — no round trip needed
+  if (state.initialAlerts !== null) {
+    renderAlertsBar(state.initialAlerts);
+    state.initialAlerts = null;
+  } else {
+    fetchAlerts();
+  }
+}
+
+function returnToLog() {
+  var from = state.alertsReturnView;
+  state.alertsReturnView = null;
+  if (from === "shift-select" || !state.currentShift) {
+    showView("shift-select");
+    return;
+  }
+  showView("log");
+  fetchAlerts();
+}
+
+function changeShift() {
+  stopLockPoll();
+  // Release any log locks held by this user before switching shifts
+  var date = state.today, shift = state.currentShift;
+  Object.keys(state.logLocks).forEach(function(dogName) {
+    google.script.run.releaseLogLock(date, shift, dogName, state.sessionEmail); // fire-and-forget
+  });
+  state.logLocks = {};
+  localStorage.removeItem("ehs_shift");
+  localStorage.removeItem("ehs_shift_date");
+  localStorage.removeItem("ehs_shift_manual");
+  localStorage.removeItem("ehs_view");
+  showView("shift-select");
+}
+
+// ══════════════════════════════════════════════════════════
+// Log grid — build + populate
+// ══════════════════════════════════════════════════════════
+function buildLogGrid() {
+  buildFilterBar();
+
+  var grid = document.getElementById("log-grid");
+  grid.innerHTML = "";
+
+  if (!state.dogs || state.dogs.length === 0) {
+    grid.innerHTML = "<div class='log-loading'>No active dogs found. Ask an admin to add dogs first.</div>";
+  } else {
+    state.dogs.forEach(function(dog) {
+      grid.appendChild(buildDogCard(dog));
+    });
+  }
+
+  // Collapsed "In Foster" section
+  if (state.fosterDogs && state.fosterDogs.length > 0) {
+    var fosterHeader = document.createElement("div");
+    fosterHeader.className = "departed-section-header";
+    fosterHeader.innerHTML = "<span>▸ In Foster (" + state.fosterDogs.length + ")</span>";
+    var fosterList = document.createElement("div");
+    fosterList.style.display = "none";
+    state.fosterDogs.forEach(function(dog) {
+      var item = document.createElement("div");
+      item.className = "departed-dog-item";
+      item.innerHTML =
+        "<span class='departed-dog-name'>" + esc(dog.dogName) + "</span>" +
+        " <span class='status-badge foster'>In Foster</span>" +
+        (dog.breed || dog.age ? "<div style='font-size:16px;color:var(--muted);margin-top:2px;'>" +
+          [dog.breed, dog.age].filter(Boolean).map(esc).join(" · ") + "</div>" : "");
+      fosterList.appendChild(item);
+    });
+    fosterHeader.onclick = function() {
+      var showing = fosterList.style.display !== "none";
+      fosterList.style.display = showing ? "none" : "";
+      fosterHeader.innerHTML = "<span>" + (showing ? "▸" : "▾") + " In Foster (" + state.fosterDogs.length + ")</span>";
+    };
+    grid.appendChild(fosterHeader);
+    grid.appendChild(fosterList);
+  }
+
+  // Collapsed "Recently Adopted" section
+  if (state.adoptedDogs && state.adoptedDogs.length > 0) {
+    var adoptedHeader = document.createElement("div");
+    adoptedHeader.className = "departed-section-header";
+    adoptedHeader.innerHTML = "<span>▸ Recently Adopted (" + state.adoptedDogs.length + ")</span>";
+    var adoptedList = document.createElement("div");
+    adoptedList.style.display = "none";
+    state.adoptedDogs.forEach(function(dog) {
+      var item = document.createElement("div");
+      item.className = "departed-dog-item";
+      item.innerHTML =
+        "<span class='departed-dog-name'>" + esc(dog.dogName) + "</span>" +
+        " <span class='status-badge adopted'>Adopted</span>" +
+        (dog.breed || dog.age ? "<div style='font-size:16px;color:var(--muted);margin-top:2px;'>" +
+          [dog.breed, dog.age].filter(Boolean).map(esc).join(" · ") + "</div>" : "");
+      adoptedList.appendChild(item);
+    });
+    adoptedHeader.onclick = function() {
+      var showing = adoptedList.style.display !== "none";
+      adoptedList.style.display = showing ? "none" : "";
+      adoptedHeader.innerHTML = "<span>" + (showing ? "▸" : "▾") + " Recently Adopted (" + state.adoptedDogs.length + ")</span>";
+    };
+    grid.appendChild(adoptedHeader);
+    grid.appendChild(adoptedList);
+  }
+
+  // Fetch log lock state and apply overlays after grid is built
+  var dogNamesForLock = (state.dogs || []).map(function(d) { return d.dogName; });
+  if (dogNamesForLock.length > 0 && state.currentShift) {
+    google.script.run
+      .withSuccessHandler(applyLogLockOverlays)
+      .withFailureHandler(function() {})
+      .getAllLogLocks(state.today, state.currentShift, dogNamesForLock, state.sessionEmail);
+  }
+}
+
+function buildDogCard(dog) {
+  var id = dogId(dog.dogName);
+  var card = document.createElement("div");
+  card.dataset.dog = dog.dogName;
+  card.id = "card-" + id;
+
+  // Respite check
+  var respite = state.respites[dog.dogName];
+  var onRespite = false;
+  var respiteEnd = null;
+  if (respite) {
+    var now = new Date();
+    var rStart = new Date(respite.start.replace(" ", "T"));
+    var rEnd   = new Date(respite.end.replace(" ", "T"));
+    onRespite = now >= rStart && now <= rEnd;
+    if (onRespite) respiteEnd = rEnd;
+  }
+
+  card.className = "dog-card" + (onRespite ? " on-respite" : "");
+
+  var headerClass = onRespite ? "" : (dog.colour ? " colour-" + dog.colour : "");
+  var colourLabels = { G: "Green", Y: "Yellow", O: "Orange", R: "Red" };
+  var dotBg = { G: "#22c55e", Y: "#eab308", O: "#f97316", R: "#ef4444" };
+  var colourRowHtml = "";
+  if (dog.colour && colourLabels[dog.colour]) {
+    colourRowHtml =
+      "<div class='dog-card-colour-row'>" +
+        "<span class='colour-dot' style='background:" + dotBg[dog.colour] + ";width:14px;height:14px;border-radius:50%;flex-shrink:0;margin-top:3px;display:inline-block;'></span>" +
+        "<span>" + colourLabels[dog.colour] +
+          (dog.colourReason ? ": " + esc(dog.colourReason) : "") +
+        "</span>" +
+      "</div>";
+  }
+
+  // Walk disabled state (profile-based)
+  var walkDisabled = !dog.walksAllowed;
+  var walkStyle    = (walkDisabled && !onRespite) ? " style='opacity:0.4;'" : "";
+  var walkTitle    = walkDisabled ? " title='Walks not currently allowed for this dog'" : "";
+  var walkDis      = (walkDisabled || onRespite) ? " disabled" : "";
+
+  // Med disabled state: needs medication AND a med defined for the current shift
+  var medForShift = "";
+  if (state.currentShift === "AM")  medForShift = dog.medBreakfast;
+  if (state.currentShift === "AFT") medForShift = dog.medLunch;
+  if (state.currentShift === "EVE") medForShift = dog.medDinner;
+  var medDisabled = !dog.medicationRequired || !medForShift;
+  var medStyle    = (medDisabled && !onRespite) ? " style='opacity:0.4;'" : "";
+  var medTitleStr = !dog.medicationRequired
+    ? "No medication required for this dog"
+    : "No medication scheduled for this shift";
+  var medTitle    = medDisabled ? " title='" + medTitleStr + "'" : "";
+  var medDis      = (medDisabled || onRespite) ? " disabled" : "";
+
+  var viewOnly    = state.isView;
+  var bmDis       = (onRespite || viewOnly) ? " disabled" : "";
+  var foodDis     = (onRespite || viewOnly) ? " disabled" : "";
+  var commentsCE  = (onRespite || viewOnly) ? "false" : "true";
+  if (viewOnly) {
+    walkDis = " disabled";
+    medDis  = " disabled";
+  }
+
+  var respiteOverlayHtml = "";
+  if (onRespite && respiteEnd) {
+    var endFmt = respiteEnd.toLocaleDateString("en-CA", { month: "short", day: "numeric" }) +
+      " " + respiteEnd.toLocaleTimeString("en-CA", { hour: "numeric", minute: "2-digit" });
+    respiteOverlayHtml =
+      "<div class='respite-overlay'>" +
+        "<div class='respite-overlay-title'>🏠 On Respite</div>" +
+        "<div class='respite-overlay-until'>Away until " + esc(endFmt) + "</div>" +
+        "<button class='btn btn-secondary btn-sm' onclick='markEarlyReturn(\"" + esc(dog.dogName) + "\")'>" +
+          "Mark Early Return" +
+        "</button>" +
+      "</div>";
+  }
+
+  card.innerHTML =
+    "<div class='dog-card-header" + headerClass + "'>" +
+      "<div class='dog-card-header-main'>" +
+        "<div class='dog-card-name-row'>" +
+          (dog.photoUrl ? "<img class='dog-photo-thumb' src='" + esc(dog.photoUrl) + "' alt='" + esc(dog.dogName) + "'>" : "") +
+          "<span class='dog-card-name'>" + esc(dog.dogName) + "</span>" +
+        "</div>" +
+        (onRespite ? "<span class='status-badge' style='background:#e2e8f0;color:#475569;font-size:14px;'>On Respite</span>" : "") +
+      "</div>" +
+      (onRespite ? "" : colourRowHtml) +
+    "</div>" +
+
+    "<div class='dog-card-inner'>" +
+      // Details panel — always visible, no toggle
+      "<div class='dog-details-panel' id='details-" + id + "'>" +
+        renderDogDetailsHtml(dog) +
+      "</div>" +
+
+      // Fields side (respite overlay sits on top when on respite)
+      "<div class='dog-fields-side'>" +
+        respiteOverlayHtml +
+        "<div class='dog-fields-row' id='fields-row-" + id + "'>" +
+          "<div class='field-group'>" +
+            "<label class='field-label' for='bm-" + id + "'>BM (1–7)</label>" +
+            "<input type='number' id='bm-" + id + "' min='1' max='7'" + bmDis + ">" +
+          "</div>" +
+          "<div class='field-group'>" +
+            "<label class='field-label' for='med-" + id + "'" + medStyle + medTitle + ">Medication given?</label>" +
+            "<select id='med-" + id + "'" + medDis + medStyle + medTitle + ">" +
+              "<option value=''>—</option>" +
+              "<option value='Y'>Y — Yes</option>" +
+              "<option value='N'>N — No</option>" +
+            "</select>" +
+          "</div>" +
+          "<div class='field-group'>" +
+            "<label class='field-label' for='food-" + id + "'>Food eaten?</label>" +
+            "<select id='food-" + id + "'" + foodDis + ">" +
+              "<option value=''>—</option>" +
+              "<option value='Fully Eaten'>Fully Eaten</option>" +
+              "<option value='Half Eaten'>Half Eaten</option>" +
+              "<option value='Not Eaten'>Not Eaten</option>" +
+            "</select>" +
+          "</div>" +
+          "<div class='field-group'>" +
+            "<label class='field-label' for='walk-" + id + "'" + walkStyle + walkTitle + ">Walk</label>" +
+            "<input type='text' id='walk-" + id + "'" + walkDis + walkStyle + walkTitle + ">" +
+          "</div>" +
+        "</div>" +
+
+        "<div class='comments-row' id='comments-row-" + id + "'>" +
+          "<label class='field-label'>Comments</label>" +
+          "<div class='comments-toolbar'>" +
+            "<button type='button' class='rt-btn' onclick='rtFormatById(\"comments-" + id + "\",\"bold\")'><b>B</b></button>" +
+            "<button type='button' class='rt-btn' onclick='rtFormatById(\"comments-" + id + "\",\"italic\")'><i>I</i></button>" +
+            "<button type='button' class='rt-btn' onclick='rtFormatById(\"comments-" + id + "\",\"underline\")'><u>U</u></button>" +
+          "</div>" +
+          "<div class='comments-rich-editor' id='comments-" + id + "' contenteditable='" + commentsCE + "'></div>" +
+          "<span class='save-status' id='save-status-" + id + "'></span>" +
+        "</div>" +
+      "</div>" +
+    "</div>";
+
+  if (!state.isView) {
+    // Acquire lock as soon as the user clicks into any field on this card
+    var fieldsRow = card.querySelector("#fields-row-" + id);
+    if (fieldsRow) {
+      fieldsRow.addEventListener("focusin", function() {
+        acquireLogLockIfNeeded(dog.dogName);
+      }, { once: true });
+    }
+
+    function addSaveListener(sel, evt) {
+      var el = card.querySelector(sel);
+      if (el) el.addEventListener(evt, function() {
+        triggerSave(dog.dogName);
+      });
+    }
+    addSaveListener("#bm-"       + id, "input");
+    addSaveListener("#med-"      + id, "change");
+    addSaveListener("#food-"     + id, "change");
+    addSaveListener("#walk-"     + id, "input");
+    addSaveListener("#comments-" + id, "input");
+  }
+
+  return card;
+}
+
+function fetchAndPopulateLog() {
+  google.script.run
+    .withSuccessHandler(function(entries) {
+      state.logData = {};
+      entries.forEach(function(e) { state.logData[e.dogName] = e; });
+      populateLogFields(state.logData);
+    })
+    .withFailureHandler(function(err) {
+      document.getElementById("log-grid").innerHTML +=
+        "<div class='error-msg' style='padding:20px;'>Could not load today's log entries. " +
+        "Please refresh the page and try again.</div>";
+    })
+    .getLogForDate(state.today, state.currentShift);
+
+  // Fetch log lock state in parallel
+  var dogNames = (state.dogs || []).map(function(d) { return d.dogName; });
+  if (dogNames.length > 0) {
+    google.script.run
+      .withSuccessHandler(applyLogLockOverlays)
+      .withFailureHandler(function() {})
+      .getAllLogLocks(state.today, state.currentShift, dogNames, state.sessionEmail);
+  }
+}
+
+function populateLogFields(logData) {
+  state.dogs.forEach(function(dog) {
+    var entry = logData[dog.dogName];
+    if (!entry) return;
+    var id = dogId(dog.dogName);
+    setFieldValue("bm-" + id,       entry.bm);
+    setFieldValue("med-" + id,      entry.med);
+    setFieldValue("food-" + id,     entry.food);
+    setFieldValue("walk-" + id,     entry.walk);
+    setFieldValue("comments-" + id, entry.comments);
+  });
+}
+
+function setFieldValue(elId, val) {
+  var el = document.getElementById(elId);
+  if (!el) return;
+  if (document.activeElement === el) return;
+  if (el.contentEditable === "true") {
+    el.innerHTML = val || "";
+  } else {
+    el.value = val || "";
+  }
+}
+
+// ══════════════════════════════════════════════════════════
+// Log card concurrency locking
+// ══════════════════════════════════════════════════════════
+function applyLogLockOverlays(locks) {
+  (state.dogs || []).forEach(function(dog) {
+    var id       = dogId(dog.dogName);
+    var sideEl   = document.querySelector("[id='fields-row-" + id + "']");
+    if (!sideEl) return;
+    var parent   = sideEl.parentElement; // .dog-fields-side
+    var existing = parent.querySelector(".log-lock-overlay");
+    var lockedBy = locks[dog.dogName];          // display name, or undefined
+    var isMine   = !!state.logLocks[dog.dogName]; // current user holds this lock
+
+    if (lockedBy && !isMine) {
+      // Someone else holds the lock — show (or refresh) the overlay
+      if (existing) existing.remove();
+      var overlay = document.createElement("div");
+      overlay.className = "log-lock-overlay";
+      overlay.innerHTML = "<div class='log-lock-msg'>✏️ Being filled in by<br><strong>" +
+        esc(lockedBy) + "</strong></div>";
+      parent.appendChild(overlay);
+      parent.querySelectorAll("input, select").forEach(function(el) {
+        if (!el.disabled) { el.disabled = true; el.dataset.lockDisabled = "1"; }
+      });
+      parent.querySelectorAll("[contenteditable='true']").forEach(function(el) {
+        el.contentEditable = "false"; el.dataset.lockDisabled = "1";
+      });
+    } else if (!lockedBy && existing) {
+      // Lock released — remove overlay and re-enable only fields we disabled
+      existing.remove();
+      if (!state.isView && !parent.querySelector(".respite-overlay")) {
+        parent.querySelectorAll("[data-lock-disabled='1']").forEach(function(el) {
+          if (el.hasAttribute("contenteditable")) { el.contentEditable = "true"; }
+          else { el.disabled = false; }
+          delete el.dataset.lockDisabled;
+        });
+      }
+    }
+  });
+}
+
+function startLockPoll() {
+  stopLockPoll();
+  state.lockPollInterval = setInterval(function() {
+    if (state.currentView !== "log" || !state.currentShift || !state.dogs || !state.dogs.length) return;
+    var dogNames = state.dogs.map(function(d) { return d.dogName; });
+    google.script.run
+      .withSuccessHandler(applyLogLockOverlays)
+      .withFailureHandler(function() {})
+      .getAllLogLocks(state.today, state.currentShift, dogNames, state.sessionEmail);
+  }, 15000);
+}
+
+function stopLockPoll() {
+  if (state.lockPollInterval) { clearInterval(state.lockPollInterval); state.lockPollInterval = null; }
+}
+
+function acquireLogLockIfNeeded(dogName) {
+  if (state.logLocks[dogName]) return; // already hold this lock
+  state.logLocks[dogName] = true; // optimistically mark as held
+  google.script.run
+    .withSuccessHandler(function(result) {
+      if (!result.success) {
+        // Another user holds the lock — apply overlay
+        state.logLocks[dogName] = false;
+        var locks = {}; locks[dogName] = result.lockedBy;
+        applyLogLockOverlays(locks);
+        showToast(esc(dogName) + " is being filled in by " + esc(result.lockedBy));
+      }
+    })
+    .withFailureHandler(function() { state.logLocks[dogName] = false; })
+    .acquireLogLock(state.today, state.currentShift, dogName, state.sessionEmail);
+}
+
+// ══════════════════════════════════════════════════════════
+// Auto-save
+// ══════════════════════════════════════════════════════════
+function triggerSave(dogName) {
+  var id = dogId(dogName);
+  clearTimeout(state.saveTimers[dogName]);
+  setSaveStatus(id, "saving", "Saving…");
+  state.saveTimers[dogName] = setTimeout(function() {
+    performSave(dogName);
+  }, 2500);
+}
+
+function performSave(dogName) {
+  if (state.savingNow[dogName]) {
+    state.saveTimers[dogName] = setTimeout(function() { performSave(dogName); }, 600);
+    return;
+  }
+
+  var id  = dogId(dogName);
+  var bm  = document.getElementById("bm-" + id).value;
+  var med = document.getElementById("med-" + id).value;
+  var food = document.getElementById("food-" + id).value;
+  var walk = document.getElementById("walk-" + id).value;
+  var commentsEl = document.getElementById("comments-" + id);
+  var comments = commentsEl ? (commentsEl.contentEditable === "true" ? commentsEl.innerHTML : commentsEl.value) : "";
+
+  state.savingNow[dogName] = true;
+  setSaveStatus(id, "saving", "Saving…");
+
+  google.script.run
+    .withSuccessHandler(function() {
+      state.savingNow[dogName] = false;
+      setSaveStatus(id, "saved", "Saved ✓");
+      setTimeout(function() { setSaveStatus(id, "", ""); }, 4000);
+      state.logData[dogName] = {
+        dogName: dogName, date: state.today, shift: state.currentShift,
+        bm: bm, med: med, food: food, walk: walk, comments: comments
+      };
+    })
+    .withFailureHandler(function(err) {
+      state.savingNow[dogName] = false;
+      setSaveStatus(id, "error",
+        "Could not save. Please try again. (" + (err.message || "unknown error") + ")");
+    })
+    .saveLogEntry(state.today, state.currentShift, dogName, bm, med, food, walk, comments, state.sessionEmail);
+}
+
+function setSaveStatus(id, cls, msg) {
+  var el = document.getElementById("save-status-" + id);
+  if (!el) return;
+  el.className = "save-status" + (cls ? " " + cls : "");
+  el.textContent = msg;
+}
+
+// ══════════════════════════════════════════════════════════
+// Auto-refresh (every 60 seconds)
+// ══════════════════════════════════════════════════════════
+function refreshLogData() {
+  checkShiftAutoTransition();
+  if (state.currentView !== "log" || !state.currentShift) return;
+  google.script.run
+    .withSuccessHandler(function(entries) {
+      var updated = {};
+      entries.forEach(function(e) { updated[e.dogName] = e; });
+      state.logData = updated;
+      populateLogFields(updated);
+    })
+    .getLogForDate(state.today, state.currentShift);
+  fetchAlerts();
+  google.script.run
+    .withSuccessHandler(function(dogs) {
+      if (dogs.length !== state.dogs.length) {
+        state.dogs = dogs;
+        buildLogGrid();
+        buildFilterBar();
+        if (state.logData && Object.keys(state.logData).length > 0) {
+          populateLogFields(state.logData);
+        }
+      }
+    })
+    .getActiveDogs();
+}
+
+// ══════════════════════════════════════════════════════════
+// Dog filter bar
+// ══════════════════════════════════════════════════════════
+function buildFilterBar() {
+  var inner = document.getElementById("filter-bar-inner");
+  inner.innerHTML = "";
+
+  var allBtn = document.createElement("button");
+  allBtn.className = "filter-btn active";
+  allBtn.id = "filter-btn-all";
+  allBtn.textContent = "All Dogs";
+  allBtn.onclick = function() { filterDog("ALL"); };
+  inner.appendChild(allBtn);
+
+  state.dogs.forEach(function(dog) {
+    var btn = document.createElement("button");
+    btn.className = "filter-btn";
+    btn.id = "filter-btn-" + dogId(dog.dogName);
+    btn.textContent = dog.dogName;
+    btn.onclick = function() { filterDog(dog.dogName); };
+    inner.appendChild(btn);
+  });
+}
+
+function filterDog(name) {
+  document.querySelectorAll(".filter-btn").forEach(function(btn) {
+    btn.classList.remove("active");
+  });
+  var activeId = name === "ALL" ? "filter-btn-all" : "filter-btn-" + dogId(name);
+  var activeBtn = document.getElementById(activeId);
+  if (activeBtn) activeBtn.classList.add("active");
+
+  document.querySelectorAll(".dog-card").forEach(function(card) {
+    if (name === "ALL" || card.dataset.dog === name) {
+      card.classList.remove("filtered-out");
+    } else {
+      card.classList.add("filtered-out");
+    }
+  });
+}
+
+// ══════════════════════════════════════════════════════════
+// Shift Alerts
+// ══════════════════════════════════════════════════════════
+function fetchAlerts() {
+  google.script.run
+    .withSuccessHandler(renderAlertsBar)
+    .withFailureHandler(function() {})
+    .getActiveAlerts();
+}
+
+var ALERT_CAT_LABELS = {
+  ADOPTION:   "Adoption",
+  FOSTER:     "Foster",
+  BEHAVIOUR:  "Behaviour & Handling",
+  OPERATIONS: "Operations",
+  MEDICAL:    "Medical",
+  TRAINING:   "Training",
+  GENERAL:    "General"
+};
+
+function nextShiftKey(key) {
+  return key === "AM" ? "AFT" : key === "AFT" ? "EVE" : "AM";
+}
+
+function alertCatBadge(category) {
+  var cat   = category || "GENERAL";
+  var label = ALERT_CAT_LABELS[cat] || cat;
+  return "<span class='alert-cat-badge'>" + esc(label) + "</span>";
+}
+
+function renderAlertsBar(alerts) {
+  var banner = document.getElementById("alerts-banner");
+  if (!alerts || alerts.length === 0) {
+    banner.classList.add("hidden");
+    banner.innerHTML = "";
+    return;
+  }
+
+  var nextKey = nextShiftKey(state.currentShift);
+
+  var current = alerts.filter(function(a) {
+    return !a.shiftFilter || a.shiftFilter === "ALL" || a.shiftFilter === state.currentShift;
+  });
+  // Only treat as outgoing if it was explicitly posted as a shift-handoff note (not an admin-targeted alert)
+  var outgoing = alerts.filter(function(a) {
+    return a.shiftFilter === nextKey && a.handoff === "Y";
+  });
+
+  if (current.length === 0 && outgoing.length === 0) {
+    banner.classList.add("hidden");
+    banner.innerHTML = "";
+    return;
+  }
+
+  banner.classList.remove("hidden");
+  banner.innerHTML = "";
+
+  function buildAlertCard(alert, badgeOverride) {
+    var cat  = alert.category || "GENERAL";
+    var card = document.createElement("div");
+    card.className = "alert-card alert-cat-" + cat;
+    var _catColors = { ADOPTION:"#0f766e", FOSTER:"#6d28d9", BEHAVIOUR:"#c2410c", OPERATIONS:"#1d4ed8", MEDICAL:"#b91c1c", TRAINING:"#15803d", GENERAL:"#92400e" };
+    var _catBgs    = { ADOPTION:"#f0fdfa", FOSTER:"#f5f3ff", BEHAVIOUR:"#fff7ed", OPERATIONS:"#eff6ff", MEDICAL:"#fef2f2", TRAINING:"#f0fdf4", GENERAL:"#fffbeb" };
+    var _cc = _catColors[cat] || "#92400e";
+    var _cb = _catBgs[cat]    || "#fffbeb";
+    card.style.background   = _cb;
+    card.style.borderTop    = "1px solid " + _cc;
+    card.style.borderRight  = "1px solid " + _cc;
+    card.style.borderBottom = "1px solid " + _cc;
+    card.style.borderLeft   = "5px solid " + _cc;
+
+    var expiryLabel = "";
+    if (alert.expiresOn) {
+      var parts = alert.expiresOn.split("-");
+      var d = new Date(parseInt(parts[0]), parseInt(parts[1]) - 1, parseInt(parts[2]));
+      expiryLabel = "Visible until " + d.toLocaleDateString("en-CA", { month: "short", day: "numeric" });
+      if (alert.expiresOn === state.today) expiryLabel = "Visible today only";
+    }
+
+    var dismissHtml = "";
+    if (state.canManageAlerts) {
+      dismissHtml = "<button class='alert-dismiss-btn' onclick='dismissAlert(this," + alert.rowIndex + ")'>Delete</button>";
+    }
+
+    var badge = badgeOverride
+      ? "<span class='alert-cat-badge'>" + esc(badgeOverride) + "</span>"
+      : alertCatBadge(cat);
+
+    card.innerHTML =
+      "<div class='alert-card-body'>" +
+        badge +
+        "<div class='alert-card-msg'>" + esc(alert.message) + "</div>" +
+        "<div class='alert-card-meta'>" +
+          (alert.createdBy ? "From: " + esc(alert.createdBy) : "") +
+          (alert.createdBy && expiryLabel ? " · " : "") +
+          esc(expiryLabel) +
+        "</div>" +
+      "</div>" +
+      dismissHtml;
+
+    return card;
+  }
+
+  current.forEach(function(alert) {
+    banner.appendChild(buildAlertCard(alert, null));
+  });
+
+  if (outgoing.length > 0) {
+    var sep = document.createElement("div");
+    sep.className = "alert-outgoing-label";
+    sep.textContent = "Left for " + nextShiftName(state.currentShift) + " shift";
+    banner.appendChild(sep);
+    outgoing.forEach(function(alert) {
+      banner.appendChild(buildAlertCard(alert, null));
+    });
+  }
+}
+
+function dismissAlert(btn, rowIndex) {
+  var card = btn.closest(".alert-card");
+  if (card) card.remove(); // instant visual feedback — card is gone, no re-fetch needed
+  google.script.run
+    .withFailureHandler(function(err) {
+      fetchAlerts(); // something went wrong — restore the banner
+      alert("Could not delete: " + (err.message || "please try again."));
+    })
+    .dismissAlert(rowIndex, state.sessionEmail);
+}
+
+function handleAlertBtn() {
+  if (state.canManageAlerts) {
+    openAlerts();
+  } else {
+    togglePostAlertPanel();
+  }
+}
+
+function togglePostAlertPanel() {
+  var panel = document.getElementById("post-alert-panel");
+  var isHidden = panel.classList.contains("hidden");
+  if (isHidden) {
+    panel.classList.remove("hidden");
+    document.getElementById("alert-message").value = "";
+    document.getElementById("alert-post-status").textContent = "";
+    document.getElementById("alert-message").focus();
+  } else {
+    panel.classList.add("hidden");
+  }
+}
+
+function openAlerts() {
+  state.alertsReturnView = state.currentView;
+  showView("alerts");
+  document.getElementById("adm-alert-message").value = "";
+  document.getElementById("adm-alert-category").value = "GENERAL";
+  document.getElementById("adm-alert-shift").value = "ALL";
+  document.getElementById("adm-alert-visible-from").value = state.today;
+  document.getElementById("adm-alert-expiry").value = addDays(state.today, 1);
+  document.getElementById("adm-alert-status").textContent = "";
+  loadAlertsMgmt();
+}
+
+function loadAlertsMgmt() {
+  var list = document.getElementById("alerts-mgmt-list");
+  list.innerHTML = "<div class='log-loading'><span class='spinner'></span> Loading…</div>";
+  google.script.run
+    .withSuccessHandler(renderAlertsMgmt)
+    .withFailureHandler(function() {
+      list.innerHTML = "<div class='error-msg'>Could not load alerts.</div>";
+    })
+    .getActiveAlerts();
+}
+
+function renderAlertsMgmt(alerts) {
+  var list = document.getElementById("alerts-mgmt-list");
+  list.innerHTML = "";
+  if (!alerts || alerts.length === 0) {
+    list.innerHTML = "<p class='muted' style='padding:12px 0;'>No active alerts.</p>";
+    return;
+  }
+  alerts.forEach(function(alert) {
+    var cat  = alert.category || "GENERAL";
+    var card = document.createElement("div");
+    card.className = "alert-card alert-cat-" + cat;
+    card.style.marginBottom = "10px";
+    var _catColors2 = { ADOPTION:"#0f766e", FOSTER:"#6d28d9", BEHAVIOUR:"#c2410c", OPERATIONS:"#1d4ed8", MEDICAL:"#b91c1c", TRAINING:"#15803d", GENERAL:"#92400e" };
+    var _catBgs2    = { ADOPTION:"#f0fdfa", FOSTER:"#f5f3ff", BEHAVIOUR:"#fff7ed", OPERATIONS:"#eff6ff", MEDICAL:"#fef2f2", TRAINING:"#f0fdf4", GENERAL:"#fffbeb" };
+    var _cc2 = _catColors2[cat] || "#92400e";
+    var _cb2 = _catBgs2[cat]    || "#fffbeb";
+    card.style.background   = _cb2;
+    card.style.borderTop    = "1px solid " + _cc2;
+    card.style.borderRight  = "1px solid " + _cc2;
+    card.style.borderBottom = "1px solid " + _cc2;
+    card.style.borderLeft   = "5px solid " + _cc2;
+
+    var expiryLabel = "";
+    if (alert.expiresOn) {
+      var parts = alert.expiresOn.split("-");
+      var d = new Date(parseInt(parts[0]), parseInt(parts[1]) - 1, parseInt(parts[2]));
+      expiryLabel = "Until " + d.toLocaleDateString("en-CA", { month: "short", day: "numeric" });
+      if (alert.expiresOn === state.today) expiryLabel = "Today only";
+    }
+
+    var shiftLabel = alert.shiftFilter && alert.shiftFilter !== "ALL"
+      ? { AM: "Morning", AFT: "Afternoon", EVE: "Evening" }[alert.shiftFilter] || alert.shiftFilter
+      : "";
+
+    var meta = [];
+    if (alert.createdBy) meta.push("From: " + esc(alert.createdBy));
+    if (expiryLabel)     meta.push(esc(expiryLabel));
+    if (shiftLabel)      meta.push(esc(shiftLabel) + " shift only");
+
+    card.innerHTML =
+      "<div class='alert-card-body'>" +
+        alertCatBadge(cat) +
+        "<div class='alert-card-msg'>" + esc(alert.message) + "</div>" +
+        "<div class='alert-card-meta'>" + meta.join(" · ") + "</div>" +
+      "</div>" +
+      "<button class='alert-dismiss-btn' onclick='dismissAlertMgmt(this," + alert.rowIndex + ")'>Delete</button>";
+
+    list.appendChild(card);
+  });
+}
+
+function dismissAlertMgmt(btn, rowIndex) {
+  var card = btn.closest(".alert-card");
+  if (card) card.remove(); // instant visual feedback — no re-fetch needed on success
+  google.script.run
+    .withFailureHandler(function(err) {
+      loadAlertsMgmt(); // restore if failed
+      var list = document.getElementById("alerts-mgmt-list");
+      list.insertAdjacentHTML("afterbegin",
+        "<div class='error-msg' style='margin-bottom:10px;'>Could not delete. " + (err.message || "Please try again.") + "</div>"
+      );
+    })
+    .dismissAlert(rowIndex, state.sessionEmail);
+}
+
+function submitAdminAlert() {
+  var msg         = document.getElementById("adm-alert-message").value.trim();
+  var expiry      = document.getElementById("adm-alert-expiry").value;
+  var category    = document.getElementById("adm-alert-category").value;
+  var shiftFilter = document.getElementById("adm-alert-shift").value;
+  var visibleFrom = document.getElementById("adm-alert-visible-from").value || state.today;
+  var status      = document.getElementById("adm-alert-status");
+
+  if (!msg) {
+    status.style.color = "var(--red)";
+    status.textContent = "Please enter a message.";
+    return;
+  }
+  if (!expiry) {
+    status.style.color = "var(--red)";
+    status.textContent = "Please set a Visible Until date.";
+    return;
+  }
+
+  status.style.color = "var(--amber)";
+  status.textContent = "Posting…";
+
+  google.script.run
+    .withSuccessHandler(function() {
+      document.getElementById("adm-alert-message").value = "";
+      document.getElementById("adm-alert-category").value = "GENERAL";
+      document.getElementById("adm-alert-shift").value = "ALL";
+      document.getElementById("adm-alert-visible-from").value = state.today;
+      document.getElementById("adm-alert-expiry").value = addDays(state.today, 1);
+      status.style.color = "var(--green)";
+      status.textContent = "Alert posted ✓";
+      setTimeout(function() { status.textContent = ""; }, 3000);
+      loadAlertsMgmt();
+    })
+    .withFailureHandler(function(err) {
+      status.style.color = "var(--red)";
+      status.textContent = "Could not post. " + (err.message || "Please try again.");
+    })
+    .saveAlert(msg, expiry, category, shiftFilter, visibleFrom, "", state.sessionEmail);
+}
+
+function submitAlert() {
+  var msg    = document.getElementById("alert-message").value.trim();
+  var expiry = state.canManageAlerts ? document.getElementById("alert-expiry").value : state.nextShiftExpiry;
+  var status = document.getElementById("alert-post-status");
+
+  if (!msg) {
+    status.style.color = "var(--red)";
+    status.textContent = "Please enter a message.";
+    return;
+  }
+
+  status.style.color = "var(--amber)";
+  status.textContent = "Posting…";
+
+  google.script.run
+    .withSuccessHandler(function() {
+      status.style.color = "var(--green-dark)";
+      status.textContent = "Posted ✓";
+      fetchAlerts();
+      setTimeout(function() {
+        document.getElementById("post-alert-panel").classList.add("hidden");
+        document.getElementById("alert-message").value = "";
+        status.textContent = "";
+      }, 1500);
+    })
+    .withFailureHandler(function(err) {
+      status.style.color = "var(--red)";
+      status.textContent = "Could not post. " + (err.message || "Please try again.");
+    })
+    .saveAlert(msg, expiry, "GENERAL", nextShiftKey(state.currentShift), state.today, "Y", state.sessionEmail);
+}
+
+// ══════════════════════════════════════════════════════════
+// Rich text — Important highlight
+// ══════════════════════════════════════════════════════════
+function applyImportantStyle(editorId) {
+  var el = document.getElementById(editorId);
+  if (!el) return;
+  el.focus();
+  var sel = window.getSelection();
+  if (!sel || !sel.rangeCount || sel.isCollapsed) return;
+  var range = sel.getRangeAt(0);
+
+  // Walk up from the selection anchor to see if it's already inside an important span
+  var node = range.commonAncestorContainer;
+  if (node.nodeType === 3) node = node.parentElement;
+  var alreadyImportant = false;
+  while (node && node !== el) {
+    if (node.tagName === "SPAN" && node.style && node.style.color === "rgb(204, 0, 0)") {
+      alreadyImportant = true;
+      break;
+    }
+    node = node.parentElement;
+  }
+
+  if (alreadyImportant) {
+    document.execCommand("removeFormat", false, null);
+  } else {
+    try {
+      var span = document.createElement("span");
+      span.style.color = "#cc0000";
+      span.style.fontWeight = "bold";
+      range.surroundContents(span);
+      sel.removeAllRanges();
+    } catch(e) {
+      document.execCommand("bold", false, null);
+      document.execCommand("foreColor", false, "#cc0000");
+    }
+  }
+  el.dispatchEvent(new Event("input", { bubbles: true }));
+}
+
+// ══════════════════════════════════════════════════════════
+// Dog profile form — medication detail field toggle
+// ══════════════════════════════════════════════════════════
+function toggleMedDetails() {
+  var checked = document.getElementById("f-medicationRequired");
+  var group   = document.getElementById("med-detail-fields");
+  if (!checked || !group) return;
+  group.style.display = checked.checked ? "" : "none";
+}
+
+// ══════════════════════════════════════════════════════════
+// Dog details panel
+// ══════════════════════════════════════════════════════════
+function renderDogDetailsHtml(dog) {
+  if (!dog || !dog.dogName) {
+    return "<div style='padding:8px;color:var(--muted);font-size:17px;'>No profile data on file for this dog.</div>";
+  }
+  function section(label, val, isRichText) {
+    if (!val) return "";
+    return "<div class='details-section'>" +
+      "<div class='details-section-label'>" + esc(label) + "</div>" +
+      "<div class='details-section-value'>" + (isRichText ? val : esc(val)) + "</div>" +
+    "</div>";
+  }
+  function basicItem(label, val) {
+    if (!val) return "";
+    return "<div class='details-basic-item'>" +
+      "<div class='details-basic-label'>" + esc(label) + "</div>" +
+      "<div class='details-basic-value'>" + esc(val) + "</div>" +
+    "</div>";
+  }
+  function feedingItem(label, val) {
+    return "<div class='details-feeding-item'>" +
+      "<div class='details-section-label'>" + esc(label) + "</div>" +
+      "<div style='font-size:18px;'>" + (val ? esc(val) : "<span class='muted'>—</span>") + "</div>" +
+    "</div>";
+  }
+
+  return "<div class='details-basic-grid'>" +
+    basicItem("Breed",        dog.breed) +
+    basicItem("Age",          dog.age) +
+    basicItem("Weight",       dog.weight) +
+    basicItem("Sex",          dog.sex) +
+    basicItem("Arrived",      dog.arrivalDate ? dog.arrivalDate.split(" ")[0] : "") +
+  "</div>" +
+  "<div class='details-feeding-grid'>" +
+    feedingItem("Breakfast", dog.breakfast) +
+    feedingItem("Lunch",     dog.lunch) +
+    feedingItem("Dinner",    dog.dinner) +
+  "</div>" +
+
+  section("History", dog.history, true) +
+
+  "<div class='details-section'>" +
+    "<div class='details-section-label'>Medical</div>" +
+    (dog.medicationRequired
+      ? "<span style='font-size:15px;font-weight:800;'>🚨 Medication Required</span>" +
+        "<div class='details-feeding-grid' style='margin-top:8px;margin-bottom:0;'>" +
+          feedingItem("Breakfast", dog.medBreakfast) +
+          feedingItem("Lunch",     dog.medLunch) +
+          feedingItem("Dinner",    dog.medDinner) +
+        "</div>"
+      : "<span style='color:var(--muted);font-size:15px;font-weight:800;'>No medication required</span>") +
+    (dog.medical ? "<div class='details-section-value' style='margin-top:6px;'>" + dog.medical + "</div>" : "") +
+  "</div>" +
+
+  section("Behaviour & Handling",      dog.behaviour, true) +
+  section("Entering/Exiting Kennel",   dog.kennel,    true) +
+
+  "<div class='details-section'>" +
+    "<div class='details-section-label'>Walks</div>" +
+    (dog.walksAllowed
+      ? "<span style='font-size:15px;font-weight:800;'>✅ Walks Allowed</span>"
+      : "<span style='color:var(--red);font-size:15px;font-weight:800;'>🚫 No Walks</span>") +
+    (dog.walks ? "<div class='details-section-value' style='margin-top:6px;'>" + dog.walks + "</div>" : "") +
+  "</div>" +
+
+  section("Backyard",  dog.backyard, true) +
+  section("Likes",     dog.likes,    true) +
+  section("Dislikes",  dog.dislikes, true);
+}
+
+// ══════════════════════════════════════════════════════════
+// History view
+// ══════════════════════════════════════════════════════════
+function openHistory() {
+  if (!state.historyDate) {
+    state.historyDate = state.today;
+  }
+  switchHistoryMode(state.historyMode);
+  showView("history");
+}
+
+function switchHistoryMode(mode) {
+  state.historyMode = mode;
+
+  document.getElementById("mode-btn-bydate").classList.toggle("active", mode === "byDate");
+  document.getElementById("mode-btn-bydog").classList.toggle("active", mode === "byDog");
+  document.getElementById("history-bydate").classList.toggle("hidden", mode !== "byDate");
+  document.getElementById("history-bydog").classList.toggle("hidden",  mode !== "byDog");
+
+  if (mode === "byDate") {
+    loadHistoryByDate(state.historyDate);
+  } else {
+    buildDogSelector();
+    if (state.historyDog) {
+      loadHistoryByDog(state.historyDog, state.historyDays);
+    }
+  }
+}
+
+function navigateHistoryDate(delta) {
+  state.historyDate = addDays(state.historyDate, delta);
+  loadHistoryByDate(state.historyDate);
+}
+
+function loadHistoryByDate(dateStr) {
+  state.historyDate = dateStr;
+  document.getElementById("hist-date-label").textContent = formatDateFull(dateStr);
+  document.getElementById("hist-date-table-wrap").innerHTML =
+    "<div class='log-loading'><span class='spinner'></span> Loading…</div>";
+
+  google.script.run
+    .withSuccessHandler(function(data) {
+      document.getElementById("hist-date-table-wrap").innerHTML = "";
+      document.getElementById("hist-date-table-wrap")
+        .appendChild(renderByDateTable(data, dateStr));
+    })
+    .withFailureHandler(function(err) {
+      document.getElementById("hist-date-table-wrap").innerHTML =
+        "<div class='error-msg'>Could not load history. Please try again.</div>";
+    })
+    .getLogHistory("byDate", dateStr, null);
+}
+
+function renderByDateTable(data, dateStr) {
+  var wrap  = document.createElement("div");
+  wrap.className = "history-table-wrap";
+  var table = document.createElement("table");
+  table.className = "history-table";
+
+  var thead = table.createTHead();
+  var hrow  = thead.insertRow();
+  var thDog = document.createElement("th");
+  thDog.textContent = "Dog";
+  hrow.appendChild(thDog);
+  state.shifts.forEach(function(s) {
+    var th = document.createElement("th");
+    th.textContent = s.label;
+    hrow.appendChild(th);
+  });
+
+  var lookup = {};
+  state.shifts.forEach(function(s) {
+    (data[s.key] || []).forEach(function(e) {
+      lookup[e.dogName + "_" + s.key] = e;
+    });
+  });
+
+  var tbody = table.createTBody();
+  if (!state.dogs || state.dogs.length === 0) {
+    var tr = tbody.insertRow();
+    var td = tr.insertCell();
+    td.colSpan = state.shifts.length + 1;
+    td.textContent = "No active dogs.";
+    td.className = "hist-empty";
+  } else {
+    state.dogs.forEach(function(dog) {
+      var tr = tbody.insertRow();
+      var dogCell = tr.insertCell();
+      dogCell.textContent = dog.dogName;
+      dogCell.style.fontWeight = "800";
+      dogCell.style.whiteSpace = "nowrap";
+
+      state.shifts.forEach(function(s) {
+        var td = tr.insertCell();
+        var key = dog.dogName + "_" + s.key;
+        var entry = lookup[key];
+        if (entry) {
+          td.innerHTML = buildSummaryHtml(entry);
+          if (state.isAdmin) {
+            var editBtn = document.createElement("button");
+            editBtn.className = "hist-edit-btn";
+            editBtn.textContent = "Edit";
+            (function(e) {
+              editBtn.onclick = function() { openHistoryDrawer(e); };
+            })(entry);
+            td.appendChild(editBtn);
+          }
+        } else {
+          if (state.isAdmin) {
+            var addBtn = document.createElement("button");
+            addBtn.className = "hist-add-btn";
+            addBtn.textContent = "+ Add";
+            (function(d, shiftKey) {
+              addBtn.onclick = function() {
+                openHistoryDrawer({
+                  date: dateStr, shift: shiftKey, dogName: d.dogName,
+                  bm: "", med: "", food: "", walk: "", comments: ""
+                });
+              };
+            })(dog, s.key);
+            td.appendChild(addBtn);
+          } else {
+            td.innerHTML = "<span class='hist-empty'>—</span>";
+          }
+        }
+      });
+    });
+  }
+
+  wrap.appendChild(table);
+  return wrap;
+}
+
+function buildDogSelector() {
+  var container = document.getElementById("hist-dog-selector");
+  container.innerHTML = "";
+  state.dogs.forEach(function(dog) {
+    var btn = document.createElement("button");
+    btn.className = "filter-btn" + (dog.dogName === state.historyDog ? " active" : "");
+    btn.textContent = dog.dogName;
+    btn.onclick = function() {
+      state.historyDog  = dog.dogName;
+      state.historyDays = 14;
+      document.querySelectorAll("#hist-dog-selector .filter-btn").forEach(function(b) {
+        b.classList.remove("active");
+      });
+      btn.classList.add("active");
+      loadHistoryByDog(dog.dogName, 14);
+    };
+    container.appendChild(btn);
+  });
+}
+
+function loadHistoryByDog(dogName, days) {
+  state.historyDog  = dogName;
+  state.historyDays = days;
+  document.getElementById("hist-dog-table-wrap").innerHTML =
+    "<div class='log-loading'><span class='spinner'></span> Loading…</div>";
+  document.getElementById("hist-load-more-row").classList.add("hidden");
+
+  google.script.run
+    .withSuccessHandler(function(entries) {
+      document.getElementById("hist-dog-table-wrap").innerHTML = "";
+      document.getElementById("hist-dog-table-wrap")
+        .appendChild(renderByDogTable(entries));
+      if (entries.length === days) {
+        document.getElementById("hist-load-more-row").classList.remove("hidden");
+      }
+    })
+    .withFailureHandler(function(err) {
+      document.getElementById("hist-dog-table-wrap").innerHTML =
+        "<div class='error-msg'>Could not load history. Please try again.</div>";
+    })
+    .getLogHistory("byDog", dogName, days);
+}
+
+function loadMoreDogHistory() {
+  state.historyDays += 14;
+  loadHistoryByDog(state.historyDog, state.historyDays);
+}
+
+function renderByDogTable(entries) {
+  var wrap  = document.createElement("div");
+  wrap.className = "history-table-wrap";
+  var table = document.createElement("table");
+  table.className = "history-table";
+
+  var thead = table.createTHead();
+  var hrow  = thead.insertRow();
+  ["Date", "Shift", "BM", "Med", "Food", "Walk", "Comments", ""].forEach(function(h) {
+    var th = document.createElement("th");
+    th.textContent = h;
+    hrow.appendChild(th);
+  });
+
+  var tbody = table.createTBody();
+  if (entries.length === 0) {
+    var tr = tbody.insertRow();
+    var td = tr.insertCell();
+    td.colSpan = 8;
+    td.textContent = "No entries in this time range.";
+    td.className = "hist-empty";
+  } else {
+    entries.forEach(function(e) {
+      var tr = tbody.insertRow();
+      var vals = [
+        formatDateFull(e.date),
+        shiftLabel(e.shift),
+        e.bm   || "—",
+        e.med  || "—",
+        e.food || "—",
+        e.walk || "—"
+      ];
+      vals.forEach(function(v) {
+        var td = tr.insertCell();
+        td.textContent = v;
+        td.style.whiteSpace = "nowrap";
+      });
+      var commentTd = tr.insertCell();
+      var span = document.createElement("span");
+      span.className = "hist-comment-short";
+      span.innerHTML = e.comments || "";
+      span.onclick = function() { this.classList.toggle("expanded"); };
+      commentTd.appendChild(span);
+
+      var actionTd = tr.insertCell();
+      if (state.isAdmin) {
+        var editBtn = document.createElement("button");
+        editBtn.className = "hist-edit-btn";
+        editBtn.textContent = "Edit";
+        (function(entry) {
+          editBtn.onclick = function() { openHistoryDrawer(entry); };
+        })(e);
+        actionTd.appendChild(editBtn);
+      }
+    });
+  }
+
+  wrap.appendChild(table);
+  return wrap;
+}
+
+function buildSummaryHtml(entry) {
+  var parts = [];
+  if (entry.bm)   parts.push("BM: " + entry.bm);
+  if (entry.med)  parts.push("Med: " + entry.med);
+  if (entry.food) parts.push("Food: " + entry.food);
+  if (entry.walk) parts.push("Walk: " + entry.walk);
+
+  var html = "<div class='hist-summary'>" + esc(parts.join(" · ")) + "</div>";
+  if (entry.comments) {
+    html += "<span class='hist-comment-short' onclick='this.classList.toggle(\"expanded\")'>" +
+      entry.comments + "</span>";
+  }
+  return html;
+}
+
+// ══════════════════════════════════════════════════════════
+// History edit drawer (admin)
+// ══════════════════════════════════════════════════════════
+function openHistoryDrawer(entry) {
+  state.drawerEntry = entry;
+  var title = entry.dogName + " — " + shiftLabel(entry.shift) + ", " + formatDateFull(entry.date);
+  document.getElementById("drawer-title").textContent = title;
+
+  document.getElementById("drawer-bm").value       = entry.bm       || "";
+  document.getElementById("drawer-med").value      = entry.med      || "";
+  document.getElementById("drawer-food").value     = entry.food     || "";
+  document.getElementById("drawer-walk").value     = entry.walk     || "";
+  document.getElementById("drawer-comments").value = entry.comments || "";
+
+  document.getElementById("drawer-save-status").className   = "save-status";
+  document.getElementById("drawer-save-status").textContent = "";
+
+  document.getElementById("history-drawer").classList.remove("hidden");
+}
+
+function closeHistoryDrawer() {
+  clearTimeout(state.drawerTimer);
+  document.getElementById("history-drawer").classList.add("hidden");
+  if (state.historyMode === "byDate") {
+    loadHistoryByDate(state.historyDate);
+  } else if (state.historyDog) {
+    loadHistoryByDog(state.historyDog, state.historyDays);
+  }
+}
+
+function triggerDrawerSave() {
+  var statusEl = document.getElementById("drawer-save-status");
+  statusEl.className   = "save-status saving";
+  statusEl.textContent = "Saving…";
+  clearTimeout(state.drawerTimer);
+  state.drawerTimer = setTimeout(performDrawerSave, 2500);
+}
+
+function performDrawerSave() {
+  if (!state.drawerEntry) return;
+  var e = state.drawerEntry;
+  var bm       = document.getElementById("drawer-bm").value;
+  var med      = document.getElementById("drawer-med").value;
+  var food     = document.getElementById("drawer-food").value;
+  var walk     = document.getElementById("drawer-walk").value;
+  var comments = document.getElementById("drawer-comments").value;
+
+  google.script.run
+    .withSuccessHandler(function() {
+      var statusEl = document.getElementById("drawer-save-status");
+      statusEl.className   = "save-status saved";
+      statusEl.textContent = "Saved ✓";
+    })
+    .withFailureHandler(function(err) {
+      var statusEl = document.getElementById("drawer-save-status");
+      statusEl.className   = "save-status error";
+      statusEl.textContent = "Could not save. Please try again.";
+    })
+    .saveLogEntry(e.date, e.shift, e.dogName, bm, med, food, walk, comments, state.sessionEmail);
+}
+
+// ══════════════════════════════════════════════════════════
+// Dog Management (admin)
+// ══════════════════════════════════════════════════════════
+function refreshManageList() {
+  var freshDogs = null, freshRespites = null;
+  function tryRender() {
+    if (freshDogs === null || freshRespites === null) return;
+    state.manageDogs = freshDogs;
+    state.manageRespites = freshRespites;
+    renderDogList(freshDogs, freshRespites);
+  }
+  google.script.run
+    .withSuccessHandler(function(dogs) { freshDogs = dogs; tryRender(); })
+    .withFailureHandler(function() { freshDogs = state.manageDogs || []; tryRender(); })
+    .getAllDogs(state.sessionEmail);
+  google.script.run
+    .withSuccessHandler(function(r) { freshRespites = r; tryRender(); })
+    .withFailureHandler(function() { freshRespites = state.manageRespites || []; tryRender(); })
+    .getActiveRespites();
+}
+
+function backFromManage() {
+  closeDogForm();
+  localStorage.removeItem("ehs_view");
+  if (!state.currentShift) {
+    showView("shift-select");
+    return;
+  }
+  showView("log");
+  startLockPoll();
+  fetchAlerts();
+  // Refresh roster in background in case anything changed
+  google.script.run
+    .withSuccessHandler(function(dogs) {
+      state.dogs = dogs;
+      buildLogGrid();
+      buildFilterBar();
+      if (state.logData && Object.keys(state.logData).length > 0) {
+        populateLogFields(state.logData);
+      }
+    })
+    .getActiveDogs();
+}
+
+function openManage() {
+  stopLockPoll();
+  showView("manage");
+  localStorage.setItem("ehs_view", "manage");
+  closeDogForm();
+
+  var hasCached = state.manageDogs !== null && state.manageRespites !== null;
+  if (hasCached) {
+    // Render immediately with cached data; refresh in background
+    renderDogList(state.manageDogs, state.manageRespites);
+  } else {
+    document.getElementById("dog-mgmt-list").innerHTML =
+      "<div class='log-loading'><span class='spinner'></span> Loading dogs…</div>";
+  }
+
+  var freshDogs    = null;
+  var freshRespites = null;
+  var freshLocks   = {};
+
+  function tryRenderFresh() {
+    if (freshDogs !== null && freshRespites !== null) {
+      state.manageDogs    = freshDogs;
+      state.manageRespites = freshRespites;
+      renderDogList(freshDogs, freshRespites, freshLocks);
+    }
+  }
+
+  google.script.run
+    .withSuccessHandler(function(dogs) {
+      freshDogs = dogs;
+      // Fetch profile locks now that we have dog names
+      if (dogs.length > 0) {
+        google.script.run
+          .withSuccessHandler(function(locks) {
+            freshLocks = locks;
+            // Re-render if already rendered with empty locks
+            if (freshRespites !== null) {
+              state.manageDogs    = freshDogs;
+              state.manageRespites = freshRespites;
+              renderDogList(freshDogs, freshRespites, freshLocks);
+            }
+          })
+          .withFailureHandler(function() {})
+          .getAllProfileLocks(dogs.map(function(d) { return d.dogName; }), state.sessionEmail);
+      }
+      tryRenderFresh();
+    })
+    .withFailureHandler(function(err) {
+      if (!hasCached) {
+        document.getElementById("dog-mgmt-list").innerHTML =
+          "<div class='error-msg'>Could not load dogs. Please try again.</div>";
+      }
+    })
+    .getAllDogs(state.sessionEmail);
+
+  google.script.run
+    .withSuccessHandler(function(respites) {
+      freshRespites = respites;
+      tryRenderFresh();
+    })
+    .withFailureHandler(function() {
+      freshRespites = [];
+      tryRenderFresh();
+    })
+    .getActiveRespites();
+}
+
+function renderDogList(dogs, respites, profileLocks) {
+  profileLocks = profileLocks || {};
+  var container = document.getElementById("dog-mgmt-list");
+
+  // Rescue form panel if it was moved inside the list (happens when editing inline).
+  // Capture editingDog first — if the user is mid-edit we re-attach after the rebuild
+  // rather than collapsing, which was causing saves to kick the user out of the form.
+  var panel = document.getElementById("dog-form-panel");
+  var wasEditingDogName = editingDog ? editingDog.dogName : null;
+  if (panel && container.contains(panel)) {
+    panel.classList.remove("open", "connected");
+    document.querySelector("#view-manage .view-inner").appendChild(panel);
+    if (!wasEditingDogName) {
+      editingDog = null;
+      clearTimeout(dogProfileSaveTimer);
+      dogProfileSaveTimer = null;
+    }
+  }
+
+  container.innerHTML = "";
+
+  if (!dogs || dogs.length === 0) {
+    container.innerHTML = "<p class='muted' style='padding:16px;'>No dogs added yet.</p>";
+    return;
+  }
+
+  // Build respite lookup by dogName (any respite where end > now)
+  var respiteMap = {};
+  (respites || []).forEach(function(r) { respiteMap[r.dogName] = r; });
+
+  var now = new Date();
+  function isIncoming(d) {
+    if (d.status !== "Active" || !d.arrivalDate) return false;
+    var dt = new Date(d.arrivalDate.replace(" ", "T"));
+    return !isNaN(dt.getTime()) && dt > now;
+  }
+  function hasScheduledAdoption(d) {
+    if (!d.adoptionDate) return false;
+    var dt = new Date(d.adoptionDate.replace(" ", "T"));
+    return !isNaN(dt.getTime()) && dt > now;
+  }
+  function isAutoAdopted(d) {
+    if (!d.adoptionDate) return false;
+    var dt = new Date(d.adoptionDate.replace(" ", "T"));
+    return !isNaN(dt.getTime()) && dt <= now;
+  }
+  function isActive(d) { return d.status === "Active" && !isIncoming(d) && !isAutoAdopted(d); }
+
+  var incomingDogs = dogs.filter(isIncoming);
+  var activeDogs   = dogs.filter(isActive);
+  var fosterDogs   = dogs.filter(function(d) { return d.status === "Foster"; });
+  var adoptedDogs  = dogs.filter(function(d) {
+    return d.status === "Adopted" || isAutoAdopted(d);
+  });
+
+  function sectionDivider(label) {
+    var d = document.createElement("div");
+    d.className = "mgmt-section-divider";
+    d.textContent = label;
+    return d;
+  }
+
+  function buildCard(dog) {
+    var card = document.createElement("div");
+    var badgeClass = isActive(dog) ? "active" : (dog.status === "Foster" ? "foster" :
+      (isAutoAdopted(dog) || dog.status === "Adopted" ? "adopted" : (isIncoming(dog) ? "incoming" : "inactive")));
+    card.className = "dog-mgmt-card" + (isActive(dog) || isIncoming(dog) ? "" : " inactive");
+    card.dataset.dogName = dog.dogName;
+
+    // Respite info for display
+    var respite = respiteMap[dog.dogName];
+    var respiteInfoHtml = "";
+    if (respite && isActive(dog)) {
+      var rStart = new Date(respite.start.replace(" ", "T"));
+      var rEnd   = new Date(respite.end.replace(" ", "T"));
+      var isCurrentlyOn = now >= rStart && now <= rEnd;
+      var fmtDate = function(dt) {
+        return dt.toLocaleDateString("en-CA", { month: "short", day: "numeric" }) + " " +
+          dt.toLocaleTimeString("en-CA", { hour: "numeric", minute: "2-digit" });
+      };
+      if (isCurrentlyOn) {
+        respiteInfoHtml = "<div style='font-size:15px;color:#475569;margin-top:4px;'>🏠 On Respite until " + esc(fmtDate(rEnd)) + "</div>";
+      } else {
+        respiteInfoHtml = "<div style='font-size:15px;color:#475569;margin-top:4px;'>📅 Upcoming respite: " +
+          esc(fmtDate(rStart)) + " – " + esc(fmtDate(rEnd)) + "</div>";
+      }
+    }
+
+    var adoptionInfoHtml = "";
+    if (hasScheduledAdoption(dog)) {
+      var adt = new Date(dog.adoptionDate.replace(" ", "T"));
+      var adtFmt = adt.toLocaleDateString("en-CA", { month: "short", day: "numeric", year: "numeric" }) +
+        " at " + adt.toLocaleTimeString("en-CA", { hour: "numeric", minute: "2-digit" });
+      adoptionInfoHtml = "<div style='font-size:15px;color:#6d28d9;margin-top:4px;font-weight:700;'>🗓️ Adoption scheduled: " + esc(adtFmt) + "</div>";
+    }
+
+    var statusLabel = isIncoming(dog) ? "Incoming" : (isAutoAdopted(dog) ? "Adopted" : esc(dog.status));
+    var info = document.createElement("div");
+    info.className = "dog-mgmt-info";
+    info.innerHTML =
+      "<div class='dog-mgmt-name' style='display:flex;align-items:center;gap:10px;'>" +
+        (dog.photoUrl ? "<img class='dog-photo-thumb-sm' src='" + esc(dog.photoUrl) + "' alt='" + esc(dog.dogName) + "'>" : "") +
+        "<span>" + esc(dog.dogName) +
+          " <span class='status-badge " + badgeClass + "'>" + statusLabel + "</span>" +
+        "</span></div>" +
+      "<div class='dog-mgmt-meta'>" +
+        [dog.breed, dog.age, dog.sex].filter(Boolean).map(esc).join(" · ") +
+      "</div>" + respiteInfoHtml + adoptionInfoHtml;
+
+    var actions = document.createElement("div");
+    actions.className = "dog-mgmt-actions";
+
+    var editBtn = document.createElement("button");
+    editBtn.className = "btn btn-secondary btn-sm btn-edit";
+    var lockedBy = profileLocks[dog.dogName];
+    if (lockedBy) {
+      editBtn.textContent = "Editing: " + lockedBy;
+      editBtn.disabled = true;
+      editBtn.classList.add("btn-locked");
+    } else {
+      editBtn.textContent = "Edit";
+      (function(d, c) {
+        editBtn.onclick = function() {
+          if (c.classList.contains("editing")) {
+            doneWithDogForm();
+          } else {
+            openDogFormWithLock(d, c, editBtn);
+          }
+        };
+      })(dog, card);
+    }
+    actions.appendChild(editBtn);
+
+    if (dog.status !== "Adopted" && !isIncoming(dog)) {
+      var histBtn = document.createElement("button");
+      histBtn.className = "btn btn-secondary btn-sm";
+      histBtn.textContent = "History";
+      (function(d) { histBtn.onclick = function() { openDogHistory(d.dogName); }; })(dog);
+      actions.appendChild(histBtn);
+    }
+
+    if (isActive(dog)) {
+      // Schedule Respite button
+      var respiteBtn = document.createElement("button");
+      respiteBtn.className = "btn btn-secondary btn-sm";
+      respiteBtn.textContent = "Schedule Respite";
+      (function(d) { respiteBtn.onclick = function() { openRespiteModal(d.dogName); }; })(dog);
+      actions.appendChild(respiteBtn);
+
+      // Send to Foster button
+      var fosterBtn = document.createElement("button");
+      fosterBtn.className = "btn btn-secondary btn-sm";
+      fosterBtn.textContent = "Send to Foster";
+      (function(d) {
+        fosterBtn.onclick = function() {
+          showConfirm("Send " + d.dogName + " to foster? They will be removed from the shift log.",
+            function() {
+              google.script.run
+                .withSuccessHandler(function() { openManage(); })
+                .withFailureHandler(function(err) { alert("Could not update: " + (err.message || "please try again.")); })
+                .setDogStatus(d.dogName, "Foster", state.sessionEmail);
+            });
+        };
+      })(dog);
+      actions.appendChild(fosterBtn);
+
+      // Mark Adopted button
+      var adoptBtn = document.createElement("button");
+      adoptBtn.className = "btn btn-secondary btn-sm";
+      adoptBtn.textContent = "Mark Adopted";
+      (function(d) {
+        adoptBtn.onclick = function() {
+          showConfirm("Mark " + d.dogName + " as adopted? They will be removed from the shift log.",
+            function() {
+              google.script.run
+                .withSuccessHandler(function() { openManage(); })
+                .withFailureHandler(function(err) { alert("Could not update: " + (err.message || "please try again.")); })
+                .setDogStatus(d.dogName, "Adopted", state.sessionEmail);
+            });
+        };
+      })(dog);
+      actions.appendChild(adoptBtn);
+
+      // Cancel Adoption button (only if one is scheduled)
+      if (hasScheduledAdoption(dog)) {
+        var cancelAdoptionBtn = document.createElement("button");
+        cancelAdoptionBtn.className = "btn btn-danger btn-sm";
+        cancelAdoptionBtn.textContent = "Cancel Adoption";
+        (function(d) {
+          cancelAdoptionBtn.onclick = function() {
+            showConfirm("Cancel the scheduled adoption for " + d.dogName + "?",
+              function() {
+                var updated = Object.assign({}, d, { adoptionDate: "", originalDogName: d.dogName });
+                google.script.run
+                  .withSuccessHandler(function() { openManage(); })
+                  .withFailureHandler(function(err) { alert("Could not cancel: " + (err.message || "please try again.")); })
+                  .saveDogProfile(updated, state.sessionEmail);
+              });
+          };
+        })(dog);
+        actions.appendChild(cancelAdoptionBtn);
+      }
+    } else if (isIncoming(dog)) {
+      // Mark Arrived → sets arrival to now
+      var arrivedBtn = document.createElement("button");
+      arrivedBtn.className = "btn btn-primary btn-sm";
+      arrivedBtn.textContent = "Mark Arrived";
+      (function(d) {
+        arrivedBtn.onclick = function() {
+          var nowStr = new Date().toISOString().slice(0,16).replace("T"," ");
+          var updated = Object.assign({}, d, { arrivalDate: nowStr, originalDogName: d.dogName });
+          google.script.run
+            .withSuccessHandler(function() { openManage(); })
+            .withFailureHandler(function(err) { alert("Could not update: " + (err.message || "please try again.")); })
+            .saveDogProfile(updated, state.sessionEmail);
+        };
+      })(dog);
+      actions.appendChild(arrivedBtn);
+    } else {
+      // Foster — can Mark Adopted or Reactivate
+      if (dog.status === "Foster") {
+        var fosterAdoptBtn = document.createElement("button");
+        fosterAdoptBtn.className = "btn btn-secondary btn-sm";
+        fosterAdoptBtn.textContent = "Mark Adopted";
+        (function(d) {
+          fosterAdoptBtn.onclick = function() {
+            showConfirm("Mark " + d.dogName + " as adopted?",
+              function() {
+                google.script.run
+                  .withSuccessHandler(function() { openManage(); })
+                  .withFailureHandler(function(err) { alert("Could not update: " + (err.message || "please try again.")); })
+                  .setDogStatus(d.dogName, "Adopted", state.sessionEmail);
+              });
+          };
+        })(dog);
+        actions.appendChild(fosterAdoptBtn);
+      }
+
+      // Reactivate (any Foster or Adopted)
+      var reactivateBtn = document.createElement("button");
+      reactivateBtn.className = "btn btn-secondary btn-sm";
+      reactivateBtn.textContent = "Reactivate";
+      (function(d) {
+        reactivateBtn.onclick = function() {
+          showConfirm("Reactivate " + d.dogName + "? They will appear in the shift log again.",
+            function() {
+              google.script.run
+                .withSuccessHandler(function() { openManage(); })
+                .withFailureHandler(function(err) { alert("Could not update: " + (err.message || "please try again.")); })
+                .setDogStatus(d.dogName, "Active", state.sessionEmail);
+            });
+        };
+      })(dog);
+      actions.appendChild(reactivateBtn);
+    }
+
+    card.appendChild(info);
+    card.appendChild(actions);
+    return card;
+  }
+
+  if (incomingDogs.length > 0) {
+    container.appendChild(sectionDivider("Incoming (" + incomingDogs.length + ")"));
+    incomingDogs.forEach(function(dog) { container.appendChild(buildCard(dog)); });
+  }
+
+  if (activeDogs.length > 0) {
+    if (incomingDogs.length > 0) container.appendChild(sectionDivider("Active (" + activeDogs.length + ")"));
+    activeDogs.forEach(function(dog) { container.appendChild(buildCard(dog)); });
+  }
+
+  // Respite section between Active and Foster
+  buildRespiteSection(container, respites);
+
+  if (fosterDogs.length > 0) {
+    container.appendChild(sectionDivider("In Foster (" + fosterDogs.length + ")"));
+    fosterDogs.forEach(function(dog) { container.appendChild(buildCard(dog)); });
+  }
+
+  if (adoptedDogs.length > 0) {
+    container.appendChild(sectionDivider("Adopted (" + adoptedDogs.length + ")"));
+    adoptedDogs.forEach(function(dog) { container.appendChild(buildCard(dog)); });
+  }
+
+  if (activeDogs.length === 0 && incomingDogs.length === 0 && fosterDogs.length === 0 && adoptedDogs.length === 0) {
+    container.innerHTML = "<p class='muted' style='padding:16px;'>No dogs added yet.</p>";
+    buildRespiteSection(container, respites);
+  }
+
+  // If the user was mid-edit when the list rebuilt (e.g. due to auto-save), re-attach
+  // the panel to their card so the form stays open.
+  if (wasEditingDogName && panel) {
+    var targetCard = container.querySelector(".dog-mgmt-card[data-dog-name=\"" + wasEditingDogName.replace(/\\/g, "\\\\").replace(/"/g, "\\\"") + "\"]");
+    if (targetCard) {
+      targetCard.classList.add("editing");
+      var editBtn = targetCard.querySelector(".btn-edit");
+      if (editBtn) editBtn.textContent = "Done";
+      targetCard.insertAdjacentElement("afterend", panel);
+      panel.classList.add("connected");
+      requestAnimationFrame(function() { panel.classList.add("open"); });
+    } else {
+      // Dog no longer in list (e.g. status changed by another admin) — close gracefully
+      editingDog = null;
+      clearTimeout(dogProfileSaveTimer);
+      dogProfileSaveTimer = null;
+    }
+  }
+}
+
+function buildRespiteSection(container, respites) {
+  var header = document.createElement("div");
+  header.className = "mgmt-section-divider";
+  header.textContent = "Upcoming & Active Respites";
+  container.appendChild(header);
+
+  if (!respites || respites.length === 0) {
+    var empty = document.createElement("p");
+    empty.className = "muted";
+    empty.style.padding = "8px 0 16px";
+    empty.textContent = "No upcoming or active respites.";
+    container.appendChild(empty);
+    return;
+  }
+
+  var now = new Date();
+  respites.forEach(function(r) {
+    var rStart = new Date(r.start.replace(" ", "T"));
+    var rEnd   = new Date(r.end.replace(" ", "T"));
+    var isNowActive = now >= rStart && now <= rEnd;
+
+    var fmtDate = function(dt) {
+      return dt.toLocaleDateString("en-CA", { month: "short", day: "numeric" }) +
+        " " + dt.toLocaleTimeString("en-CA", { hour: "numeric", minute: "2-digit" });
+    };
+
+    var card = document.createElement("div");
+    card.className = "dog-mgmt-card";
+
+    var info = document.createElement("div");
+    info.className = "dog-mgmt-info";
+    info.innerHTML =
+      "<div class='dog-mgmt-name'>" + esc(r.dogName) +
+        " <span class='status-badge' style='background:#e2e8f0;color:#475569;'>" +
+        (isNowActive ? "Active now" : "Upcoming") + "</span></div>" +
+      "<div class='dog-mgmt-meta'>" +
+        esc(fmtDate(rStart)) + " → " + esc(fmtDate(rEnd)) +
+        (r.notes ? " · " + esc(r.notes) : "") +
+      "</div>";
+
+    var actions = document.createElement("div");
+    actions.className = "dog-mgmt-actions";
+    var cancelBtn = document.createElement("button");
+    cancelBtn.className = "btn btn-danger btn-sm";
+    cancelBtn.textContent = isNowActive ? "End Now" : "Cancel";
+    (function(rowIdx, name, active) {
+      cancelBtn.onclick = function() {
+        showConfirm(active ? "End " + name + "'s respite now?" : "Cancel this respite for " + name + "?",
+          function() {
+            google.script.run
+              .withSuccessHandler(function() { openManage(); })
+              .withFailureHandler(function(err) { alert("Could not cancel: " + (err.message || "please try again.")); })
+              .cancelRespite(rowIdx, state.sessionEmail);
+          });
+      };
+    })(r.rowIndex, r.dogName, isNowActive);
+    actions.appendChild(cancelBtn);
+
+    card.appendChild(info);
+    card.appendChild(actions);
+    container.appendChild(card);
+  });
+}
+
+// ── Rich text toolbar ─────────────────────────────────────
+function rtFormat(id, cmd) {
+  var el = document.getElementById("f-" + id);
+  if (!el) return;
+  el.focus();
+  document.execCommand(cmd, false, null);
+  el.dispatchEvent(new Event("input", { bubbles: true }));
+}
+
+function rtFormatById(elId, cmd) {
+  var el = document.getElementById(elId);
+  if (!el) return;
+  el.focus();
+  document.execCommand(cmd, false, null);
+  el.dispatchEvent(new Event("input", { bubbles: true }));
+}
+
+// Dog profile form
+var editingDog = null;
+var dogProfileSaveTimer = null;
+var dogProfileSavingNow = false;
+var dogProfileLastChangedGroup = null;
+
+function openDogFormWithLock(dog, afterCard, editBtn) {
+  if (!dog) { openDogForm(dog, afterCard); return; }
+  var origText = editBtn.textContent;
+  editBtn.textContent = "Opening…";
+  editBtn.disabled = true;
+  google.script.run
+    .withSuccessHandler(function(result) {
+      if (result.success) {
+        editBtn.textContent = origText;
+        editBtn.disabled = false;
+        openDogForm(dog, afterCard);
+        // Heartbeat: renew lock every 2 minutes while form is open
+        state.lockHeartbeat = setInterval(function() {
+          google.script.run
+            .withSuccessHandler(function(r) {
+              if (!r.success) showToast("Edit lock expired — changes may conflict with another user.");
+            })
+            .withFailureHandler(function() {})
+            .renewProfileLock(dog.dogName, state.sessionEmail);
+        }, 120000);
+      } else {
+        editBtn.textContent = origText;
+        editBtn.disabled = false;
+        showToast(esc(dog.dogName) + " is being edited by " + esc(result.lockedBy));
+      }
+    })
+    .withFailureHandler(function(err) {
+      editBtn.textContent = origText;
+      editBtn.disabled = false;
+      showToast("Could not open form: " + (err.message || "try again"));
+    })
+    .acquireProfileLock(dog.dogName, state.sessionEmail);
+}
+
+function openDogForm(dog, afterCard) {
+  editingDog = dog || null;
+  dogProfileSavingNow = false;
+  clearTimeout(dogProfileSaveTimer);
+  dogProfileSaveTimer = null;
+  document.getElementById("dog-form-title").textContent =
+    editingDog ? "Editing " + editingDog.dogName : "Add New Dog";
+  document.getElementById("dog-form-status").classList.add("hidden");
+  document.getElementById("dog-form-error").classList.add("hidden");
+
+  var fieldsEl = document.getElementById("dog-form-fields");
+  if (editingDog) {
+    fieldsEl.innerHTML = buildDogFormHtml(editingDog);
+  } else {
+    fieldsEl.innerHTML =
+      "<div class='field-group'>" +
+        "<label class='field-label' for='f-dogName'>Dog Name</label>" +
+        "<input type='text' id='f-dogName' placeholder='Type a name to begin…'>" +
+      "</div>";
+  }
+
+  document.getElementById("dog-form-btn-row").innerHTML =
+    editingDog ? '<button class="btn btn-secondary" onclick="doneWithDogForm()">Done</button>' : '';
+
+  wireDogFormAutoSave();
+
+  var panel = document.getElementById("dog-form-panel");
+
+  // Remove editing highlight from any previously-open card
+  var prevEditing = document.querySelector(".dog-mgmt-card.editing");
+  if (prevEditing) prevEditing.classList.remove("editing");
+  panel.classList.remove("connected");
+
+  if (afterCard) {
+    // Move panel inline after the card so it expands in place
+    afterCard.classList.add("editing");
+    var editBtn = afterCard.querySelector(".btn-edit");
+    if (editBtn) editBtn.textContent = "Done";
+    afterCard.insertAdjacentElement("afterend", panel);
+    panel.classList.add("connected");
+  } else {
+    // Adding new dog — place panel just below the header (under the Add button)
+    var viewInner = document.querySelector("#view-manage .view-inner");
+    var backHeader = viewInner.querySelector(".back-header");
+    if (backHeader) {
+      backHeader.insertAdjacentElement("afterend", panel);
+    } else if (panel.parentNode !== viewInner) {
+      viewInner.appendChild(panel);
+    }
+  }
+
+  // Animate open — give the browser one frame to register the element's
+  // collapsed state before transitioning to open
+  requestAnimationFrame(function() {
+    panel.classList.add("open");
+    panel.scrollIntoView({ behavior: "smooth", block: "nearest" });
+  });
+}
+
+function closeDogForm() {
+  // Release profile lock and stop heartbeat if one was held
+  if (editingDog && editingDog.dogName) {
+    clearInterval(state.lockHeartbeat);
+    state.lockHeartbeat = null;
+    google.script.run.releaseProfileLock(editingDog.dogName, state.sessionEmail); // fire-and-forget
+  }
+  editingDog = null;
+  clearTimeout(dogProfileSaveTimer);
+  dogProfileSaveTimer = null;
+
+  var panel = document.getElementById("dog-form-panel");
+
+  // Restore Edit button text on the card being closed
+  var editingCard = document.querySelector(".dog-mgmt-card.editing");
+  if (editingCard) {
+    var editBtn = editingCard.querySelector(".btn-edit");
+    if (editBtn) editBtn.textContent = "Edit";
+    editingCard.classList.remove("editing");
+  }
+
+  // Animate closed, then move panel back to view-inner
+  var wasOpen = panel.classList.contains("open");
+  panel.classList.remove("open");
+
+  function afterClose() {
+    panel.removeEventListener("transitionend", afterClose);
+    clearTimeout(closeTimer);
+    panel.classList.remove("connected");
+    var viewInner = document.querySelector("#view-manage .view-inner");
+    if (panel.parentNode !== viewInner) {
+      viewInner.appendChild(panel);
+    }
+  }
+
+  if (wasOpen) {
+    panel.addEventListener("transitionend", afterClose);
+    // Fallback if transitionend doesn't fire (panel already detached, etc.)
+    var closeTimer = setTimeout(afterClose, 500);
+  } else {
+    afterClose();
+  }
+}
+
+function doneWithDogForm() {
+  var nameEl = document.getElementById("f-dogName");
+  var dogName = nameEl ? nameEl.value.trim() : "";
+
+  if (!editingDog && !dogName) {
+    showFormError("Dog Name is required.");
+    return;
+  }
+
+  if (dogProfileSaveTimer) {
+    clearTimeout(dogProfileSaveTimer);
+    dogProfileSaveTimer = null;
+    performDogProfileSave(closeDogForm);
+    return;
+  }
+
+  if (dogProfileSavingNow) {
+    // Save already in flight — close immediately; GAS call persists
+  }
+
+  closeDogForm();
+}
+
+function wireDogFormAutoSave() {
+  document.querySelectorAll("#dog-form-fields input:not([type='file']), #dog-form-fields select").forEach(function(el) {
+    el.addEventListener("input", triggerDogProfileAutoSave);
+    el.addEventListener("change", triggerDogProfileAutoSave);
+  });
+  document.querySelectorAll("#dog-form-fields .rich-editor").forEach(function(el) {
+    el.addEventListener("input", triggerDogProfileAutoSave);
+  });
+}
+
+function triggerDogProfileAutoSave(e) {
+  var nameEl = document.getElementById("f-dogName");
+  if (nameEl && !nameEl.value.trim()) return;
+
+  var target = e && e.target ? e.target : null;
+  var group = target ? target.closest(".field-group") : null;
+  if (group) dogProfileLastChangedGroup = group;
+
+  showFieldSaveStatus(dogProfileLastChangedGroup, "saving", "Saving…");
+
+  clearTimeout(dogProfileSaveTimer);
+  dogProfileSaveTimer = setTimeout(function() { performDogProfileSave(null); }, 2000);
+}
+
+function showFieldSaveStatus(group, cls, msg) {
+  if (!group) return;
+  var span = group.querySelector(".field-save-status");
+  if (!span) {
+    span = document.createElement("span");
+    span.className = "save-status field-save-status";
+    group.appendChild(span);
+  }
+  span.className = "save-status field-save-status" + (cls ? " " + cls : "");
+  span.textContent = msg;
+}
+
+function performDogProfileSave(afterSave) {
+  dogProfileSaveTimer = null;
+  var nameEl = document.getElementById("f-dogName");
+  var dogName = nameEl ? nameEl.value.trim() : "";
+  if (!dogName) {
+    if (afterSave) afterSave();
+    return;
+  }
+  if (dogProfileSavingNow) {
+    dogProfileSaveTimer = setTimeout(function() { performDogProfileSave(afterSave); }, 600);
+    return;
+  }
+
+  function richVal(id) {
+    var el = document.getElementById("f-" + id);
+    return el ? el.innerHTML.trim() : "";
+  }
+  function plainVal(id) {
+    var el = document.getElementById("f-" + id);
+    return el ? el.value.trim() : "";
+  }
+
+  var arrDateEl = document.getElementById("f-arrivalDate");
+  var arrTimeEl = document.getElementById("f-arrivalTime");
+  var arrivalDateVal = arrDateEl ? arrDateEl.value.trim() : "";
+  var arrivalTimeVal = arrTimeEl ? arrTimeEl.value.trim() : "";
+  var arrivalDateCombined = arrivalDateVal
+    ? (arrivalDateVal + (arrivalTimeVal ? " " + arrivalTimeVal : " 00:00"))
+    : "";
+
+  var adDateEl = document.getElementById("f-adoptionDate");
+  var adTimeEl = document.getElementById("f-adoptionTime");
+  var adoptionDateVal = adDateEl ? adDateEl.value.trim() : "";
+  var adoptionTimeVal = adTimeEl ? adTimeEl.value.trim() : "";
+  var adoptionDateCombined = adoptionDateVal
+    ? (adoptionDateVal + (adoptionTimeVal ? " " + adoptionTimeVal : " 00:00"))
+    : "";
+
+  var dogData = {
+    originalDogName:    editingDog ? editingDog.dogName : dogName,
+    dogName:            dogName,
+    status:             plainVal("status"),
+    breed:              plainVal("breed"),
+    age:                plainVal("age"),
+    weight:             plainVal("weight"),
+    sex:                plainVal("sex"),
+    arrivalDate:        arrivalDateCombined,
+    adoptionDate:       adoptionDateCombined,
+    breakfast:          plainVal("breakfast"),
+    lunch:              plainVal("lunch"),
+    dinner:             plainVal("dinner"),
+    colour:             plainVal("colour"),
+    colourReason:       plainVal("colourReason"),
+    walksAllowed:       !!(document.getElementById("f-walksAllowed") && document.getElementById("f-walksAllowed").checked),
+    medicationRequired: !!(document.getElementById("f-medicationRequired") && document.getElementById("f-medicationRequired").checked),
+    medBreakfast:       plainVal("medBreakfast"),
+    medLunch:           plainVal("medLunch"),
+    medDinner:          plainVal("medDinner"),
+    history:            richVal("history"),
+    walks:              richVal("walks"),
+    backyard:           richVal("backyard"),
+    medical:            richVal("medical"),
+    behaviour:          richVal("behaviour"),
+    likes:              richVal("likes"),
+    dislikes:           richVal("dislikes"),
+    kennel:             richVal("kennel")
+  };
+
+  dogProfileSavingNow = true;
+  showFieldSaveStatus(dogProfileLastChangedGroup, "saving", "Saving…");
+
+  var savedGroup = dogProfileLastChangedGroup;
+  google.script.run
+    .withSuccessHandler(function() {
+      dogProfileSavingNow = false;
+      if (!editingDog) {
+        // First save — record created; expand to full form
+        editingDog = { dogName: dogName };
+        dogProfileLastChangedGroup = null;
+        clearTimeout(dogProfileSaveTimer);
+        dogProfileSaveTimer = null;
+        document.getElementById("dog-form-title").textContent = "Edit " + dogName;
+        document.getElementById("dog-form-btn-row").innerHTML =
+          '<button class="btn btn-secondary" onclick="doneWithDogForm()">Done</button>';
+        var statusEl = document.getElementById("dog-form-status");
+        statusEl.textContent = "Dog added ✓";
+        statusEl.classList.remove("hidden");
+        setTimeout(function() { statusEl.classList.add("hidden"); statusEl.textContent = ""; }, 1200);
+        var fieldsEl = document.getElementById("dog-form-fields");
+        fieldsEl.innerHTML = buildDogFormHtml(editingDog);
+        wireDogFormAutoSave();
+      } else {
+        editingDog.dogName = dogName;
+        showFieldSaveStatus(savedGroup, "saved", "Saved ✓");
+        setTimeout(function() { showFieldSaveStatus(savedGroup, "", ""); }, 3000);
+      }
+      google.script.run
+        .withSuccessHandler(function(dogs) { state.dogs = dogs; })
+        .getActiveDogs();
+      refreshManageList();
+      if (afterSave) afterSave();
+    })
+    .withFailureHandler(function(err) {
+      dogProfileSavingNow = false;
+      showFieldSaveStatus(savedGroup, "error", "Could not save. " + (err.message || "Please try again."));
+      if (afterSave) afterSave();
+    })
+    .saveDogProfile(dogData, state.sessionEmail);
+}
+
+function buildDogFormHtml(dog) {
+  var d = dog || {};
+
+  function field(id, label, val, fullWidth) {
+    var classes = "field-group" + (fullWidth ? " full-width" : "");
+    return "<div class='" + classes + "'>" +
+      "<label class='field-label' for='f-" + id + "'>" + label + "</label>" +
+      "<input type='text' id='f-" + id + "' value='" + esc(val || "") + "'>" +
+    "</div>";
+  }
+
+  function richField(id, label, val, fullWidth, checkboxHtml) {
+    var classes = "field-group" + (fullWidth ? " full-width" : "");
+    return "<div class='" + classes + "'>" +
+      "<label class='field-label'>" + label + "</label>" +
+      (checkboxHtml ? "<div style='margin-bottom:8px;'>" + checkboxHtml + "</div>" : "") +
+      "<div class='rich-toolbar'>" +
+        "<button type='button' class='rt-btn' onclick='rtFormat(\"" + id + "\",\"bold\")'><b>B</b></button>" +
+        "<button type='button' class='rt-btn' onclick='rtFormat(\"" + id + "\",\"italic\")'><i>I</i></button>" +
+        "<button type='button' class='rt-btn' onclick='rtFormat(\"" + id + "\",\"underline\")'><u>U</u></button>" +
+        "<button type='button' class='rt-btn' style='color:#cc0000;font-weight:800;border-color:#cc0000;' onclick='applyImportantStyle(\"f-" + id + "\")' title='Highlight selected text in red — click again to remove'>Important</button>" +
+      "</div>" +
+      "<div class='rich-editor' id='f-" + id + "' contenteditable='true'>" + (val || "") + "</div>" +
+    "</div>";
+  }
+
+  var statusHtml = "<div class='field-group'>" +
+    "<label class='field-label' for='f-status'>Status</label>" +
+    "<select id='f-status'>" +
+      "<option value='Active'"  + (d.status === "Active"  || !d.status ? " selected" : "") + ">Active</option>" +
+      "<option value='Foster'"  + (d.status === "Foster"  ? " selected" : "") + ">Foster</option>" +
+      "<option value='Adopted'" + (d.status === "Adopted" ? " selected" : "") + ">Adopted</option>" +
+    "</select>" +
+  "</div>";
+
+  var colourHtml = "<div class='field-group'>" +
+    "<label class='field-label' for='f-colour'>Colour (safety level)</label>" +
+    "<select id='f-colour'>" +
+      "<option value='' "  + (!d.colour || d.colour === "" ? "selected" : "") + ">— None —</option>" +
+      "<option value='G' " + (d.colour === "G" ? "selected" : "") + ">Green</option>" +
+      "<option value='Y' " + (d.colour === "Y" ? "selected" : "") + ">Yellow</option>" +
+      "<option value='O' " + (d.colour === "O" ? "selected" : "") + ">Orange</option>" +
+      "<option value='R' " + (d.colour === "R" ? "selected" : "") + ">Red</option>" +
+    "</select>" +
+  "</div>";
+
+  var walksChecked = (d.walksAllowed === true || d.walksAllowed === "Y") ? " checked" : "";
+  var medChecked   = (d.medicationRequired === true || d.medicationRequired === "Y") ? " checked" : "";
+  var walksCheckboxHtml =
+    "<div class='checkbox-group' style='margin:0;'>" +
+      "<input type='checkbox' id='f-walksAllowed'" + walksChecked + ">" +
+      "<label for='f-walksAllowed' style='text-transform:none;letter-spacing:0;font-size:17px;font-weight:700;'>Walks Allowed</label>" +
+    "</div>";
+  var medDetailsDisplay = (d.medicationRequired === true || d.medicationRequired === "Y") ? "" : "none";
+  var medCheckboxHtml =
+    "<div class='checkbox-group' style='margin:0;'>" +
+      "<input type='checkbox' id='f-medicationRequired'" + medChecked + " onchange='toggleMedDetails()'>" +
+      "<label for='f-medicationRequired' style='text-transform:none;letter-spacing:0;font-size:17px;font-weight:700;'>Medication Required</label>" +
+    "</div>" +
+    "<div id='med-detail-fields' style='display:" + medDetailsDisplay + ";margin-top:12px;'>" +
+      "<div class='field-group' style='margin-bottom:10px;'>" +
+        "<label class='field-label' for='f-medBreakfast'>Breakfast Medication</label>" +
+        "<input type='text' id='f-medBreakfast' value='" + esc(d.medBreakfast || "") + "' placeholder='e.g. 1 Rimadyl'>" +
+      "</div>" +
+      "<div class='field-group' style='margin-bottom:10px;'>" +
+        "<label class='field-label' for='f-medLunch'>Lunch Medication</label>" +
+        "<input type='text' id='f-medLunch' value='" + esc(d.medLunch || "") + "' placeholder='e.g. ½ pill with food'>" +
+      "</div>" +
+      "<div class='field-group'>" +
+        "<label class='field-label' for='f-medDinner'>Dinner Medication</label>" +
+        "<input type='text' id='f-medDinner' value='" + esc(d.medDinner || "") + "' placeholder='e.g. 2 Tramadol'>" +
+      "</div>" +
+    "</div>";
+
+  // Split existing arrivalDate "YYYY-MM-DD HH:mm" into date + time parts
+  var arrivalDatePart = "";
+  var arrivalTimePart = "";
+  if (d.arrivalDate) {
+    var arrParts = d.arrivalDate.split(" ");
+    arrivalDatePart = arrParts[0] || "";
+    arrivalTimePart = arrParts[1] || "";
+  }
+  var arrivalFieldHtml = "<div class='field-group'>" +
+    "<label class='field-label'>Arrival Date &amp; Time</label>" +
+    "<div style='display:flex;gap:8px;'>" +
+      "<input type='date' id='f-arrivalDate' value='" + esc(arrivalDatePart) + "' style='flex:1;'>" +
+      "<input type='time' id='f-arrivalTime' value='" + esc(arrivalTimePart) + "' style='flex:1;'>" +
+    "</div>" +
+  "</div>";
+
+  var adoptionDatePart = "";
+  var adoptionTimePart = "";
+  if (d.adoptionDate) {
+    var adParts = d.adoptionDate.split(" ");
+    adoptionDatePart = adParts[0] || "";
+    adoptionTimePart = adParts[1] || "";
+  }
+  var adoptionFieldHtml = "<div class='field-group'>" +
+    "<label class='field-label'>Scheduled Adoption Date &amp; Time</label>" +
+    "<div style='display:flex;gap:8px;'>" +
+      "<input type='date' id='f-adoptionDate' value='" + esc(adoptionDatePart) + "' style='flex:1;'>" +
+      "<input type='time' id='f-adoptionTime' value='" + esc(adoptionTimePart) + "' style='flex:1;'>" +
+    "</div>" +
+  "</div>";
+
+  function sectionDivider(label) {
+    return "<div class='full-width' style='border-top:2px solid var(--border);margin:8px 0;padding-top:8px;'>" +
+      "<span style='font-size:14px;font-weight:800;text-transform:uppercase;letter-spacing:0.8px;color:var(--muted);'>" + label + "</span>" +
+    "</div>";
+  }
+
+  var photoSectionHtml = "";
+  if (d.dogName) {
+    var photoPreview = d.photoUrl
+      ? "<img src='" + esc(d.photoUrl) + "' alt='" + esc(d.dogName) + "' style='width:100%;height:100%;object-fit:cover;border-radius:50%;'>"
+      : "<span>🐕</span>";
+    var removeBtn = d.photoUrl
+      ? "<button type='button' class='btn btn-sm' style='background:#fee2e2;color:#991b1b;border:none;' onclick='handlePhotoRemove()'>Remove Photo</button>"
+      : "";
+    photoSectionHtml =
+      "<div class='full-width'>" +
+        "<div class='photo-upload-section'>" +
+          "<div class='photo-preview-circle' id='photo-preview-circle'>" + photoPreview + "</div>" +
+          "<div>" +
+            "<div style='font-weight:800;font-size:15px;text-transform:uppercase;letter-spacing:0.6px;color:var(--muted);margin-bottom:8px;'>Profile Photo</div>" +
+            "<input type='file' id='f-photoUpload' accept='image/jpeg,image/png,image/webp,image/gif' style='display:none' onchange='handlePhotoUpload(this)'>" +
+            "<div style='display:flex;gap:8px;flex-wrap:wrap;align-items:center;'>" +
+              "<button type='button' class='btn btn-secondary btn-sm' onclick=\"document.getElementById('f-photoUpload').click()\">" +
+                (d.photoUrl ? "Replace Photo" : "Upload Photo") +
+              "</button>" +
+              removeBtn +
+            "</div>" +
+            "<div id='photo-upload-status' style='font-size:14px;margin-top:6px;min-height:18px;'></div>" +
+          "</div>" +
+        "</div>" +
+      "</div>";
+  }
+
+  return (
+    photoSectionHtml +
+    field("dogName",    "Dog Name",                d.dogName,    false) +
+    statusHtml +
+    field("breed",      "Breed",                   d.breed,      false) +
+    field("age",        "Age (e.g. 1.5 years)",    d.age,        false) +
+    field("weight",     "Weight (e.g. 55 lbs)",    d.weight,     false) +
+    field("sex",        "Sex (e.g. Neutered male)", d.sex,       false) +
+    arrivalFieldHtml +
+    adoptionFieldHtml +
+
+    sectionDivider("Colour / Safety Level") +
+    colourHtml +
+    field("colourReason", "Reason (shown on shift log)", d.colourReason, false) +
+
+    sectionDivider("Feeding") +
+    field("breakfast",  "Breakfast",               d.breakfast,  false) +
+    field("lunch",      "Lunch",                   d.lunch,      false) +
+    field("dinner",     "Dinner",                  d.dinner,     false) +
+
+    sectionDivider("Long-form Notes") +
+    richField("history",   "History & Background",              d.history,   true) +
+    richField("medical",   "Medical Notes",                     d.medical,   true, medCheckboxHtml) +
+    richField("behaviour", "Behaviour & Handling",              d.behaviour, true) +
+    richField("kennel",    "Entering/Exiting Kennel Instructions", d.kennel, true) +
+    richField("walks",     "Walk Instructions",                 d.walks,     true, walksCheckboxHtml) +
+    richField("backyard",  "Backyard Instructions",             d.backyard,  true) +
+    richField("likes",     "Likes",                             d.likes,     true) +
+    richField("dislikes",  "Dislikes",                          d.dislikes,  true)
+  );
+}
+
+function handlePhotoUpload(input) {
+  if (!input.files || !input.files[0]) return;
+  var file = input.files[0];
+  var statusEl = document.getElementById("photo-upload-status");
+  var circleEl = document.getElementById("photo-preview-circle");
+  if (file.size > 5 * 1024 * 1024) {
+    statusEl.textContent = "Photo must be under 5 MB.";
+    statusEl.style.color = "var(--red)";
+    return;
+  }
+  var dogName = editingDog && editingDog.dogName;
+  if (!dogName) return;
+  var reader = new FileReader();
+  reader.onload = function(e) {
+    // Show preview immediately
+    circleEl.innerHTML = "<img src='" + e.target.result + "' style='width:100%;height:100%;object-fit:cover;border-radius:50%;'>";
+    statusEl.textContent = "Uploading…";
+    statusEl.style.color = "var(--amber)";
+    var dataUrl = e.target.result;
+    var base64  = dataUrl.split(",")[1];
+    var mime    = file.type;
+    google.script.run
+      .withSuccessHandler(function(result) {
+        if (result.success) {
+          statusEl.textContent = "Photo saved ✓";
+          statusEl.style.color = "var(--green-dark)";
+          // Update the dog in state so the log card and manage card refresh
+          if (editingDog) editingDog.photoUrl = result.url;
+          var dogInList = state.dogs.find(function(d) { return d.dogName === dogName; });
+          if (dogInList) dogInList.photoUrl = result.url;
+        } else {
+          statusEl.textContent = "Upload failed.";
+          statusEl.style.color = "var(--red)";
+        }
+      })
+      .withFailureHandler(function(err) {
+        statusEl.textContent = "Upload failed: " + err.message;
+        statusEl.style.color = "var(--red)";
+      })
+      .saveProfilePhoto(dogName, base64, mime, state.sessionEmail);
+  };
+  reader.readAsDataURL(file);
+}
+
+function handlePhotoRemove() {
+  var dogName = editingDog && editingDog.dogName;
+  if (!dogName) return;
+  var statusEl = document.getElementById("photo-upload-status");
+  var circleEl = document.getElementById("photo-preview-circle");
+  statusEl.textContent = "Removing…";
+  statusEl.style.color = "var(--amber)";
+  google.script.run
+    .withSuccessHandler(function() {
+      circleEl.innerHTML = "<span>🐕</span>";
+      statusEl.textContent = "Photo removed.";
+      statusEl.style.color = "var(--muted)";
+      if (editingDog) editingDog.photoUrl = "";
+      var dogInList = state.dogs.find(function(d) { return d.dogName === dogName; });
+      if (dogInList) dogInList.photoUrl = "";
+    })
+    .withFailureHandler(function(err) {
+      statusEl.textContent = "Remove failed: " + err.message;
+      statusEl.style.color = "var(--red)";
+    })
+    .removeProfilePhoto(dogName, state.sessionEmail);
+}
+
+function submitDogForm() {
+  var dogName = document.getElementById("f-dogName").value.trim();
+  if (!dogName) {
+    showFormError("Dog Name is required.");
+    return;
+  }
+
+  function richVal(id) {
+    var el = document.getElementById("f-" + id);
+    return el ? el.innerHTML.trim() : "";
+  }
+  function plainVal(id) {
+    var el = document.getElementById("f-" + id);
+    return el ? el.value.trim() : "";
+  }
+
+  var arrDateEl2 = document.getElementById("f-arrivalDate");
+  var arrTimeEl2 = document.getElementById("f-arrivalTime");
+  var arrivalDateVal2 = arrDateEl2 ? arrDateEl2.value.trim() : "";
+  var arrivalTimeVal2 = arrTimeEl2 ? arrTimeEl2.value.trim() : "";
+  var arrivalDateCombined2 = arrivalDateVal2
+    ? (arrivalDateVal2 + (arrivalTimeVal2 ? " " + arrivalTimeVal2 : " 00:00"))
+    : "";
+
+  var adDateEl2 = document.getElementById("f-adoptionDate");
+  var adTimeEl2 = document.getElementById("f-adoptionTime");
+  var adoptionDateVal2 = adDateEl2 ? adDateEl2.value.trim() : "";
+  var adoptionTimeVal2 = adTimeEl2 ? adTimeEl2.value.trim() : "";
+  var adoptionDateCombined2 = adoptionDateVal2
+    ? (adoptionDateVal2 + (adoptionTimeVal2 ? " " + adoptionTimeVal2 : " 00:00"))
+    : "";
+
+  var dogData = {
+    originalDogName: editingDog ? editingDog.dogName : dogName,
+    dogName:         dogName,
+    status:          plainVal("status"),
+    breed:           plainVal("breed"),
+    age:             plainVal("age"),
+    weight:          plainVal("weight"),
+    sex:             plainVal("sex"),
+    arrivalDate:     arrivalDateCombined2,
+    adoptionDate:    adoptionDateCombined2,
+    breakfast:       plainVal("breakfast"),
+    lunch:           plainVal("lunch"),
+    dinner:          plainVal("dinner"),
+    colour:              plainVal("colour"),
+    colourReason:        plainVal("colourReason"),
+    walksAllowed:        document.getElementById("f-walksAllowed")       ? document.getElementById("f-walksAllowed").checked       : false,
+    medicationRequired:  document.getElementById("f-medicationRequired") ? document.getElementById("f-medicationRequired").checked : false,
+    medBreakfast:        plainVal("medBreakfast"),
+    medLunch:            plainVal("medLunch"),
+    medDinner:           plainVal("medDinner"),
+    history:             richVal("history"),
+    walks:           richVal("walks"),
+    backyard:        richVal("backyard"),
+    medical:         richVal("medical"),
+    behaviour:       richVal("behaviour"),
+    likes:           richVal("likes"),
+    dislikes:        richVal("dislikes"),
+    kennel:          richVal("kennel")
+  };
+
+  document.getElementById("dog-form-error").classList.add("hidden");
+  document.getElementById("dog-form-status").textContent = "Saving…";
+  document.getElementById("dog-form-status").classList.remove("hidden");
+
+  google.script.run
+    .withSuccessHandler(function(result) {
+      document.getElementById("dog-form-status").textContent =
+        result.action === "created" ? dogName + " added." : dogName + " updated.";
+      google.script.run
+        .withSuccessHandler(function(dogs) {
+          state.dogs = dogs;
+          buildLogGrid();
+          buildFilterBar();
+          if (state.logData && Object.keys(state.logData).length > 0) {
+            populateLogFields(state.logData);
+          }
+        })
+        .getActiveDogs();
+      setTimeout(function() { openManage(); }, 1200);
+    })
+    .withFailureHandler(function(err) {
+      document.getElementById("dog-form-status").classList.add("hidden");
+      showFormError("Could not save. " + (err.message || "Please try again."));
+    })
+    .saveDogProfile(dogData, state.sessionEmail);
+}
+
+function showFormError(msg) {
+  var el = document.getElementById("dog-form-error");
+  el.textContent = msg;
+  el.classList.remove("hidden");
+}
+
+// ══════════════════════════════════════════════════════════
+// Profile history modal
+// ══════════════════════════════════════════════════════════
+function openDogHistory(dogName) {
+  document.getElementById("history-modal-title").textContent = dogName + " — Profile History";
+  document.getElementById("history-modal-body").innerHTML =
+    "<div class='log-loading'><span class='spinner'></span> Loading…</div>";
+  document.getElementById("history-modal").classList.remove("hidden");
+
+  google.script.run
+    .withSuccessHandler(renderHistoryModal)
+    .withFailureHandler(function(err) {
+      document.getElementById("history-modal-body").innerHTML =
+        "<div class='error-msg'>Could not load history. " + (err.message || "Please try again.") + "</div>";
+    })
+    .getProfileHistory(dogName, state.sessionEmail);
+}
+
+function closeHistoryModal() {
+  document.getElementById("history-modal").classList.add("hidden");
+}
+
+function renderHistoryModal(entries) {
+  var body = document.getElementById("history-modal-body");
+  if (!entries || entries.length === 0) {
+    body.innerHTML = "<p class='muted' style='padding:8px 0;'>No changes recorded yet. History is captured from the next save onwards.</p>";
+    return;
+  }
+
+  var colourLabels = { G: "Green", Y: "Yellow", O: "Orange", R: "Red" };
+  var html = "<div style='overflow-x:auto;'><table class='history-table' style='min-width:560px;'><thead><tr>" +
+    "<th>When</th><th>Who</th><th>Colour</th><th>Walks</th><th>Medication</th>" +
+    "</tr></thead><tbody>";
+
+  entries.forEach(function(e) {
+    var colourLabel = colourLabels[e.colour] || (e.colour || "—");
+    var walksBadge  = e.walksAllowed
+      ? "<span style='color:#166534;font-weight:800;'>✅ Yes</span>"
+      : "<span style='color:#991b1b;font-weight:800;'>🚫 No</span>";
+
+    var medHtml = "";
+    if (!e.medicationRequired) {
+      medHtml = "<span style='color:var(--muted);'>None</span>";
+    } else {
+      medHtml = "<span style='font-weight:800;'>🚨 Required</span>";
+      var schedule = [];
+      if (e.medBreakfast) schedule.push("<b>B:</b> " + esc(e.medBreakfast));
+      if (e.medLunch)     schedule.push("<b>L:</b> " + esc(e.medLunch));
+      if (e.medDinner)    schedule.push("<b>D:</b> " + esc(e.medDinner));
+      if (schedule.length) medHtml += "<br><span style='font-size:15px;'>" + schedule.join(" · ") + "</span>";
+    }
+
+    html += "<tr>" +
+      "<td style='white-space:nowrap;font-size:15px;'>" + esc(e.timestamp) + "</td>" +
+      "<td style='font-size:15px;'>" + esc(e.changedBy) + "</td>" +
+      "<td>" + esc(colourLabel) + (e.colourReason ? "<br><span style='font-size:14px;color:var(--muted);'>" + esc(e.colourReason) + "</span>" : "") + "</td>" +
+      "<td>" + walksBadge + "</td>" +
+      "<td style='font-size:15px;'>" + medHtml + "</td>" +
+      "</tr>";
+  });
+
+  html += "</tbody></table></div>";
+  html += "<p style='font-size:14px;color:var(--muted);margin-top:12px;'>Showing last " + entries.length + " change" + (entries.length === 1 ? "" : "s") + ". Full data is in the Profile History sheet.</p>";
+  body.innerHTML = html;
+}
+
+// ══════════════════════════════════════════════════════════
+// Respite scheduling (admin)
+// ══════════════════════════════════════════════════════════
+function openRespiteModal(dogName) {
+  state.respiteDogForModal = dogName;
+  document.getElementById("respite-modal-title").textContent = "Schedule Respite — " + dogName;
+  var today = state.today;
+  document.getElementById("respite-start-date").value = today;
+  document.getElementById("respite-start-time").value = "09:00";
+  document.getElementById("respite-end-date").value   = today;
+  document.getElementById("respite-end-time").value   = "17:00";
+  document.getElementById("respite-notes").value      = "";
+  document.getElementById("respite-modal-status").textContent = "";
+  document.getElementById("respite-modal").classList.remove("hidden");
+}
+
+function closeRespiteModal() {
+  document.getElementById("respite-modal").classList.add("hidden");
+  state.respiteDogForModal = null;
+}
+
+function submitRespite() {
+  var dogName = state.respiteDogForModal;
+  if (!dogName) return;
+
+  var startDate = document.getElementById("respite-start-date").value;
+  var startTime = document.getElementById("respite-start-time").value || "00:00";
+  var endDate   = document.getElementById("respite-end-date").value;
+  var endTime   = document.getElementById("respite-end-time").value || "23:59";
+  var notes     = document.getElementById("respite-notes").value.trim();
+  var status    = document.getElementById("respite-modal-status");
+
+  if (!startDate || !endDate) {
+    status.style.color = "var(--red)";
+    status.textContent = "Start and end dates are required.";
+    return;
+  }
+
+  var start = startDate + " " + startTime;
+  var end   = endDate   + " " + endTime;
+  if (new Date(end.replace(" ","T")) <= new Date(start.replace(" ","T"))) {
+    status.style.color = "var(--red)";
+    status.textContent = "End must be after start.";
+    return;
+  }
+
+  status.style.color = "var(--amber)";
+  status.textContent = "Scheduling…";
+
+  google.script.run
+    .withSuccessHandler(function() {
+      status.style.color = "var(--green-dark)";
+      status.textContent = "Scheduled ✓";
+      setTimeout(function() {
+        closeRespiteModal();
+        openManage();
+      }, 1000);
+    })
+    .withFailureHandler(function(err) {
+      status.style.color = "var(--red)";
+      status.textContent = "Could not schedule. " + (err.message || "Please try again.");
+    })
+    .scheduleRespite(dogName, start, end, notes, state.sessionEmail);
+}
+
+// ══════════════════════════════════════════════════════════
+// Mark Early Return (any user, from log grid card)
+// ══════════════════════════════════════════════════════════
+function markEarlyReturn(dogName) {
+  showConfirm(dogName + " has returned early from respite?",
+    function() {
+      google.script.run
+        .withSuccessHandler(function() {
+          google.script.run
+            .withSuccessHandler(function(respites) {
+              state.respites = {};
+              respites.forEach(function(r) { state.respites[r.dogName] = r; });
+              buildLogGrid();
+              fetchAndPopulateLog();
+            })
+            .getActiveRespites();
+        })
+        .withFailureHandler(function(err) {
+          alert("Could not mark return: " + (err.message || "please try again."));
+        })
+        .markReturnedEarly(dogName);
+    });
+}
+
+// ══════════════════════════════════════════════════════════
+// Respite auto-refresh — every 30s, re-check active respites
+// Updates state.respites and re-applies disabled states to
+// existing cards WITHOUT rebuilding the DOM
+// ══════════════════════════════════════════════════════════
+function refreshRespiteStates() {
+  if (state.currentView !== "log" || !state.currentShift) return;
+  google.script.run
+    .withSuccessHandler(function(respites) {
+      var newMap = {};
+      respites.forEach(function(r) { newMap[r.dogName] = r; });
+
+      var changed = false;
+      state.dogs.forEach(function(dog) {
+        var oldOnRespite = !!applyRespiteCard(dog.dogName, state.respites[dog.dogName]);
+        var newOnRespite = !!applyRespiteCard(dog.dogName, newMap[dog.dogName]);
+        if (oldOnRespite !== newOnRespite) changed = true;
+      });
+
+      state.respites = newMap;
+
+      if (changed) {
+        buildLogGrid();
+        fetchAndPopulateLog();
+      }
+    })
+    .withFailureHandler(function() {})
+    .getActiveRespites();
+}
+
+function applyRespiteCard(dogName, respite) {
+  var now = new Date();
+  if (!respite) return false;
+  var rStart = new Date(respite.start.replace(" ", "T"));
+  var rEnd   = new Date(respite.end.replace(" ", "T"));
+  return now >= rStart && now <= rEnd;
+}
+
+// ══════════════════════════════════════════════════════════
+// Confirmation modal
+// ══════════════════════════════════════════════════════════
+function showConfirm(message, onYes) {
+  document.getElementById("confirm-message").textContent = message;
+  document.getElementById("confirm-yes-btn").onclick = function() {
+    closeConfirm();
+    onYes();
+  };
+  document.getElementById("confirm-modal").classList.remove("hidden");
+}
+
+function closeConfirm() {
+  document.getElementById("confirm-modal").classList.add("hidden");
+}
+
+// ══════════════════════════════════════════════════════════
+// Test Panel (Ctrl+Shift+T to open)
+// ══════════════════════════════════════════════════════════
+function openTestPanel() {
+  var views = ["view-shift-select", "view-log", "view-history", "view-manage", "view-alerts"];
+  views.forEach(function(id) { document.getElementById(id).classList.add("hidden"); });
+  document.getElementById("view-test").classList.remove("hidden");
+  window.scrollTo(0, 0);
+}
+
+function closeTestPanel() {
+  showView("shift-select");
+}
+
+function runClientTests() {
+  var btn     = document.getElementById("run-tests-btn");
+  var list    = document.getElementById("test-results");
+  var summary = document.getElementById("test-summary");
+
+  btn.disabled    = true;
+  btn.textContent = "Running…";
+  list.innerHTML  = "";
+  summary.classList.add("hidden");
+  list.scrollIntoView({ behavior: "instant", block: "start" });
+
+  setTimeout(function() {
+
+  var totalPass = 0, totalFail = 0, pending = 0, asyncStarted = false;
+
+  function addSection(label) {
+    var li = document.createElement("li");
+    li.className  = "test-section-label";
+    li.textContent = label;
+    list.appendChild(li);
+  }
+
+  function addItem(name) {
+    var li = document.createElement("li");
+    li.className = "test-item running";
+    li.innerHTML =
+      "<span class='test-icon'><span class='spinner'></span></span>" +
+      "<span class='test-name'>" + esc(name) + "</span>";
+    list.appendChild(li);
+    return li;
+  }
+
+  function resolve(li, passed, detail) {
+    li.className = "test-item " + (passed ? "pass" : "fail");
+    var nameText  = li.querySelector(".test-name").textContent;
+    var detailHtml = (detail && !passed)
+      ? "<div class='test-detail'>" + esc(detail) + "</div>" : "";
+    li.innerHTML =
+      "<span class='test-icon'></span>" +
+      "<span class='test-name'>" + esc(nameText) + detailHtml + "</span>";
+    if (passed) totalPass++; else totalFail++;
+  }
+
+  function syncTest(name, fn) {
+    var li = addItem(name);
+    try {
+      var r = fn();
+      resolve(li, r === true || r === undefined, typeof r === "string" ? r : "");
+    } catch(e) { resolve(li, false, e.message); }
+  }
+
+  function asyncTest(name, fn) {
+    var li = addItem(name);
+    pending++;
+    fn(function(passed, detail) {
+      resolve(li, passed, detail || "");
+      pending--;
+      if (pending === 0 && asyncStarted) finish();
+    });
+  }
+
+  function finish() {
+    btn.disabled    = false;
+    btn.textContent = "▶ Run All";
+    summary.classList.remove("hidden");
+    if (totalFail === 0) {
+      summary.className   = "test-summary all-pass";
+      summary.textContent = "All " + totalPass + " tests passed ✓";
+    } else {
+      summary.className   = "test-summary has-fail";
+      summary.textContent = totalFail + " failed · " + totalPass + " passed";
+    }
+  }
+
+  // ── Fix 1: Done button after dog creation ──────────────────
+  addSection("Fix 1 — Done button appears after dog creation");
+  syncTest("performDogProfileSave injects Done button into btn-row on first save", function() {
+    var src = performDogProfileSave.toString();
+    if (src.indexOf("dog-form-btn-row") === -1) return "dog-form-btn-row update not found";
+    if (src.indexOf("doneWithDogForm")  === -1) return "doneWithDogForm() reference not found";
+  });
+
+  // ── Fix 2: No spurious Saving… ────────────────────────────
+  addSection("Fix 2 — No spurious Saving… after form expands");
+  syncTest("performDogProfileSave clears retry timer on first save", function() {
+    var src   = performDogProfileSave.toString();
+    var addedIdx = src.indexOf("Dog added");
+    if (addedIdx === -1) return "'Dog added' text not found in success handler";
+    if (src.slice(0, addedIdx).indexOf("clearTimeout") === -1)
+      return "clearTimeout not found before 'Dog added ✓'";
+  });
+
+  // ── Fix 3: Manage Dogs instant on return ──────────────────
+  addSection("Fix 3 — Manage Dogs instant on return visit");
+  syncTest("openManage renders cached data immediately, no spinner on return", function() {
+    var src = openManage.toString();
+    if (src.indexOf("hasCached") === -1) return "hasCached check not found in openManage";
+  });
+
+  // ── Fix 4a: Formatting buttons trigger auto-save ──────────
+  addSection("Fix 4a — Formatting buttons trigger auto-save");
+
+  syncTest("rtFormat dispatches input event after execCommand", function() {
+    var fired = false;
+    var div = document.createElement("div");
+    div.contentEditable = "true";
+    div.id = "f-__rttest__";
+    div.textContent = "hello";
+    document.body.appendChild(div);
+    div.addEventListener("input", function() { fired = true; });
+    try {
+      div.focus();
+      var r = document.createRange(); r.selectNodeContents(div);
+      var s = window.getSelection(); s.removeAllRanges(); s.addRange(r);
+      rtFormat("__rttest__", "bold");
+    } finally { document.body.removeChild(div); }
+    if (!fired) return "input event was not dispatched";
+  });
+
+  syncTest("rtFormatById dispatches input event after execCommand", function() {
+    var fired = false;
+    var div = document.createElement("div");
+    div.contentEditable = "true";
+    div.id = "__rtbyidtest__";
+    div.textContent = "hello";
+    document.body.appendChild(div);
+    div.addEventListener("input", function() { fired = true; });
+    try {
+      div.focus();
+      var r = document.createRange(); r.selectNodeContents(div);
+      var s = window.getSelection(); s.removeAllRanges(); s.addRange(r);
+      rtFormatById("__rtbyidtest__", "bold");
+    } finally { document.body.removeChild(div); }
+    if (!fired) return "input event was not dispatched";
+  });
+
+  syncTest("applyImportantStyle dispatches input event after wrapping span", function() {
+    var fired = false;
+    var div = document.createElement("div");
+    div.contentEditable = "true";
+    div.id = "__imptest__";
+    div.textContent = "hello";
+    document.body.appendChild(div);
+    div.addEventListener("input", function() { fired = true; });
+    try {
+      div.focus();
+      var r = document.createRange(); r.selectNodeContents(div);
+      var s = window.getSelection(); s.removeAllRanges(); s.addRange(r);
+      applyImportantStyle("__imptest__");
+    } finally { document.body.removeChild(div); }
+    if (!fired) return "input event was not dispatched";
+  });
+
+  // ── Fix 4b: kennel in auto-save ───────────────────────────
+  addSection("Fix 4b — Kennel field included in auto-save");
+  syncTest("performDogProfileSave dogData includes kennel via richVal", function() {
+    var src = performDogProfileSave.toString();
+    if (src.indexOf("kennel") === -1) return "kennel field not found";
+    if (src.indexOf("richVal(\"kennel\")") === -1 && src.indexOf("richVal('kennel')") === -1)
+      return "kennel not read via richVal()";
+  });
+
+  // ── Fix 5: Shift-handoff vs admin alerts ──────────────────
+  addSection("Fix 5 — Shift-handoff vs admin shift-targeted alerts");
+
+  syncTest("outgoing section only includes alerts with handoff='Y'", function() {
+    var origShift = state.currentShift;
+    state.currentShift = "EVE"; // next shift = AM
+
+    renderAlertsBar([
+      { rowIndex: 901, message: "Handoff note", category: "GENERAL",
+        shiftFilter: "AM", visibleFrom: "", expiresOn: state.today, createdBy: "Vol", handoff: "Y" },
+      { rowIndex: 902, message: "Admin alert",  category: "MEDICAL",
+        shiftFilter: "AM", visibleFrom: "", expiresOn: state.today, createdBy: "Admin", handoff: "" }
+    ]);
+
+    var banner = document.getElementById("alerts-banner");
+    var labels = banner.querySelectorAll(".alert-outgoing-label");
+    var cards  = banner.querySelectorAll(".alert-card");
+
+    state.currentShift = origShift;
+    renderAlertsBar([]);
+
+    // Handoff note → outgoing section; admin AM alert → not current (EVE≠AM) AND not outgoing (no handoff) → hidden
+    if (labels.length !== 1) return "Expected 1 outgoing label, got " + labels.length;
+    if (cards.length  !== 1) return "Expected 1 card (handoff only), got " + cards.length;
+  });
+
+  syncTest("outgoing separator shows even when no current alerts exist", function() {
+    var origShift = state.currentShift;
+    state.currentShift = "EVE";
+
+    renderAlertsBar([
+      { rowIndex: 903, message: "Solo handoff", category: "GENERAL",
+        shiftFilter: "AM", visibleFrom: "", expiresOn: state.today, createdBy: "Vol", handoff: "Y" }
+    ]);
+
+    var labels = document.getElementById("alerts-banner").querySelectorAll(".alert-outgoing-label");
+    state.currentShift = origShift;
+    renderAlertsBar([]);
+
+    if (labels.length !== 1) return "Separator missing when only outgoing alerts (no current alerts)";
+  });
+
+  // ── Fix 6: Log fields repopulated after buildLogGrid ──────
+  addSection("Fix 6 — Log fields stay populated after roster refresh");
+  syncTest("refreshLogData calls populateLogFields after buildLogGrid", function() {
+    var src    = refreshLogData.toString();
+    var bgIdx  = src.indexOf("buildLogGrid");
+    if (bgIdx === -1) return "buildLogGrid not found in refreshLogData";
+    var pfIdx  = src.indexOf("populateLogFields", bgIdx);
+    if (pfIdx === -1) return "populateLogFields not called after buildLogGrid in refreshLogData";
+  });
+
+  // ── Backend tests (GAS round trips) ───────────────────────
+  addSection("Backend — GAS round trips (a few seconds each)");
+
+  asyncTest("Fix 5: saveAlert stores handoff='Y'; getActiveAlerts returns it", function(done) {
+    var msg = "__TEST_" + Date.now() + "__";
+    google.script.run
+      .withSuccessHandler(function() {
+        google.script.run
+          .withSuccessHandler(function(alerts) {
+            var found = null;
+            for (var i = 0; i < alerts.length; i++) {
+              if (alerts[i].message === msg) { found = alerts[i]; break; }
+            }
+            if (!found) { done(false, "test alert not found"); return; }
+            var ok = found.handoff === "Y";
+            google.script.run.dismissAlert(found.rowIndex, state.sessionEmail);
+            done(ok, ok ? "" : "handoff was '" + found.handoff + "', expected 'Y'");
+          })
+          .withFailureHandler(function(e) { done(false, e.message); })
+          .getActiveAlerts();
+      })
+      .withFailureHandler(function(e) { done(false, e.message); })
+      .saveAlert(msg, state.today, "GENERAL", "ALL", state.today, "Y", state.sessionEmail);
+  });
+
+  asyncTest("Fix 5: saveAlert without handoff returns empty handoff field", function(done) {
+    var msg = "__TEST2_" + Date.now() + "__";
+    google.script.run
+      .withSuccessHandler(function() {
+        google.script.run
+          .withSuccessHandler(function(alerts) {
+            var found = null;
+            for (var i = 0; i < alerts.length; i++) {
+              if (alerts[i].message === msg) { found = alerts[i]; break; }
+            }
+            if (!found) { done(false, "test alert not found"); return; }
+            var ok = found.handoff === "";
+            google.script.run.dismissAlert(found.rowIndex, state.sessionEmail);
+            done(ok, ok ? "" : "handoff was '" + found.handoff + "', expected ''");
+          })
+          .withFailureHandler(function(e) { done(false, e.message); })
+          .getActiveAlerts();
+      })
+      .withFailureHandler(function(e) { done(false, e.message); })
+      .saveAlert(msg, state.today, "GENERAL", "ALL", state.today, "", state.sessionEmail);
+  });
+
+  asyncTest("Fix 7: Dog Profiles sheet headers match PROFILE_HEADERS", function(done) {
+    google.script.run
+      .withSuccessHandler(function(r) { done(r.ok, r.detail); })
+      .withFailureHandler(function(e) { done(false, e.message); })
+      .checkProfileHeaders();
+  });
+
+  asyncStarted = true;
+  if (pending === 0) finish();
+
+  }, 0); // end setTimeout — lets browser paint "Running…" + empty list before tests fill in
+}
+
+// ══════════════════════════════════════════════════════════
+// Login / session
+// ══════════════════════════════════════════════════════════
+function submitLogin() {
+  var email = document.getElementById("login-email").value.trim();
+  var errEl  = document.getElementById("login-error");
+  errEl.classList.add("hidden");
+  errEl.textContent = "";
+  if (!email || email.indexOf("@") === -1) {
+    errEl.textContent = "Please enter a valid email address.";
+    errEl.classList.remove("hidden");
+    return;
+  }
+  var btn = document.querySelector("#login-form .btn");
+  btn.disabled = true;
+  btn.textContent = "Sending…";
+  google.script.run
+    .withSuccessHandler(function(result) {
+      btn.disabled = false;
+      btn.textContent = "Send me a sign-in link";
+      if (result.ok) {
+        document.getElementById("login-form").classList.add("hidden");
+        document.getElementById("login-sent-msg").textContent = "A sign-in link was sent to " + email + ". Click it to open the app.";
+        document.getElementById("login-sent").classList.remove("hidden");
+      } else {
+        errEl.textContent = result.message;
+        errEl.classList.remove("hidden");
+      }
+    })
+    .withFailureHandler(function(err) {
+      btn.disabled = false;
+      btn.textContent = "Send me a sign-in link";
+      errEl.textContent = "Something went wrong. Please try again.";
+      errEl.classList.remove("hidden");
+    })
+    .sendMagicLink(email);
+}
+
+function resetLogin() {
+  document.getElementById("login-sent").classList.add("hidden");
+  document.getElementById("login-form").classList.remove("hidden");
+  document.getElementById("login-email").value = "";
+  document.getElementById("login-email").focus();
+}
+
+function signOut() {
+  localStorage.removeItem("ehs_session");
+  localStorage.removeItem("ehs_shift");
+  localStorage.removeItem("ehs_shift_date");
+  localStorage.removeItem("ehs_shift_manual");
+  localStorage.removeItem("ehs_view");
+  location.reload();
+}
+
+function bootApp(email, role) {
+  state.sessionEmail    = email;
+  state.isAdmin         = role === "Admin";
+  state.isAlertAccess   = role === "Alert Access";
+  state.isView          = role === "View";
+  state.canManageAlerts = state.isAdmin || state.isAlertAccess;
+
+  initShiftSelector();
+
+  if (state.isAdmin) {
+    document.querySelectorAll(".admin-only").forEach(function(el) {
+      el.classList.remove("hidden");
+    });
+  }
+  if (state.canManageAlerts) {
+    var alertNavBtn = document.getElementById("alert-nav-btn");
+    if (alertNavBtn) alertNavBtn.textContent = "📢 Manage Alerts";
+  }
+  if (state.isView) {
+    var btn = document.getElementById("alert-nav-btn");
+    if (btn) btn.style.display = "none";
+    var notice = document.createElement("div");
+    notice.id = "view-only-notice";
+    notice.style.cssText = "background:#eff6ff;border-bottom:2px solid #93c5fd;padding:10px 20px;font-size:15px;font-weight:700;color:#1e40af;text-align:center;";
+    notice.innerHTML = "View-only access. Contact your administrator for write access.";
+    var filterBar = document.getElementById("filter-bar");
+    if (filterBar) filterBar.parentNode.insertBefore(notice, filterBar);
+  }
+
+  if (state.isView) {
+    selectShift(state.initialLogShift);
+    return;
+  }
+
+  var savedShift  = localStorage.getItem("ehs_shift");
+  var savedDate   = localStorage.getItem("ehs_shift_date");
+  var savedManual = localStorage.getItem("ehs_shift_manual");
+  if (savedShift && savedDate === state.today && (isShiftStillActive(savedShift) || savedManual === "1")) {
+    selectShift(savedShift);
+  }
+  if (localStorage.getItem("ehs_view") === "manage" && state.isAdmin) {
+    openManage();
+  }
+
+  setInterval(refreshLogData, 60000);
+  setInterval(refreshRespiteStates, 30000);
+}
+
+// ══════════════════════════════════════════════════════════
+// Init
+// ══════════════════════════════════════════════════════════
+document.addEventListener("DOMContentLoaded", function() {
+  document.addEventListener("keydown", function(e) {
+    if (e.ctrlKey && e.shiftKey && e.key === "T") {
+      e.preventDefault();
+      openTestPanel();
+    }
+  });
+
+  // 1. Magic link just clicked — token resolved server-side
+  if (state.userEmail && state.userRole) {
+    localStorage.setItem("ehs_session", JSON.stringify({ email: state.userEmail, role: state.userRole }));
+    if (window.history && window.history.replaceState) {
+      window.history.replaceState({}, "", window.location.pathname);
+    }
+    showView("shift-select");
+    bootApp(state.userEmail, state.userRole);
+    return;
+  }
+
+  // 2. Token in URL but it failed server-side — check localStorage first
+  // (handles refresh-after-login: token already consumed but session is valid)
+  if (state.tokenError) {
+    var storedOnErr = localStorage.getItem("ehs_session");
+    if (storedOnErr) {
+      try {
+        var sessOnErr = JSON.parse(storedOnErr);
+        if (sessOnErr && sessOnErr.email && sessOnErr.role) {
+          // Valid session exists — fall through to branch 3 instead of showing error
+          state.tokenError = "";
+        }
+      } catch (e) {}
+    }
+    if (state.tokenError) {
+      showView("login");
+      var errEl = document.getElementById("login-error");
+      errEl.textContent = state.tokenError;
+      errEl.classList.remove("hidden");
+      return;
+    }
+  }
+
+  // 3. Returning user — check localStorage
+  var stored = localStorage.getItem("ehs_session");
+  if (stored) {
+    try {
+      var sess = JSON.parse(stored);
+      if (sess && sess.email && sess.role) {
+        google.script.run
+          .withSuccessHandler(function(data) {
+            if (data && data.error === "no_access") {
+              localStorage.removeItem("ehs_session");
+              showView("login");
+              return;
+            }
+            state.dogs          = data.dogs;
+            state.fosterDogs    = data.recentDeparted.foster;
+            state.adoptedDogs   = data.recentDeparted.adopted;
+            state.initialAlerts = data.alerts;
+            state.today         = data.today;
+            state.todayFormatted = data.todayFormatted;
+            (data.respites || []).forEach(function(r) { state.respites[r.dogName] = r; });
+            showView("shift-select");
+            bootApp(sess.email, data.role);
+          })
+          .withFailureHandler(function() {
+            showView("shift-select");
+            bootApp(sess.email, sess.role);
+          })
+          .getInitialData(sess.email);
+        return;
+      }
+    } catch (e) { /* bad JSON — fall through */ }
+  }
+
+  // 4. No session — show login screen
+  showView("login");
+  setTimeout(function() {
+    var el = document.getElementById("login-email");
+    if (el) el.focus();
+  }, 100);
+});
+</script>
+</body>
+</html>
