@@ -3267,9 +3267,15 @@ function renderDogList(dogs, respites, profileLocks) {
   var panel = document.getElementById("dog-form-panel");
   var wasEditingDogName = editingDog ? editingDog.dogName : null;
   if (panel && container.contains(panel)) {
-    panel.classList.remove("open", "connected");
-    document.querySelector("#view-manage .view-inner").appendChild(panel);
-    if (!wasEditingDogName) {
+    if (wasEditingDogName) {
+      // Mid-edit: move the panel silently without collapsing it. Removing "open" would
+      // cause a visible flash and could lose focus on contenteditable fields.
+      // "connected" is removed because the old card is about to be destroyed by innerHTML="".
+      panel.classList.remove("connected");
+      document.querySelector("#view-manage .view-inner").appendChild(panel);
+    } else {
+      panel.classList.remove("open", "connected");
+      document.querySelector("#view-manage .view-inner").appendChild(panel);
       editingDog = null;
       clearTimeout(dogProfileSaveTimer);
       dogProfileSaveTimer = null;
@@ -3547,7 +3553,8 @@ function renderDogList(dogs, respites, profileLocks) {
   }
 
   // If the user was mid-edit when the list rebuilt (e.g. due to auto-save), re-attach
-  // the panel to their card so the form stays open.
+  // the panel to their card so the form stays open. The panel still has its "open" class
+  // (we never removed it above), so no animation is needed — it just snaps back in place.
   if (wasEditingDogName && panel) {
     var targetCard = container.querySelector(".dog-mgmt-card[data-dog-name=\"" + wasEditingDogName.replace(/\\/g, "\\\\").replace(/"/g, "\\\"") + "\"]");
     if (targetCard) {
@@ -3556,9 +3563,9 @@ function renderDogList(dogs, respites, profileLocks) {
       if (editBtn) editBtn.textContent = "Done";
       targetCard.insertAdjacentElement("afterend", panel);
       panel.classList.add("connected");
-      requestAnimationFrame(function() { panel.classList.add("open"); });
     } else {
       // Dog no longer in list (e.g. status changed by another admin) — close gracefully
+      panel.classList.remove("open");
       editingDog = null;
       clearTimeout(dogProfileSaveTimer);
       dogProfileSaveTimer = null;
