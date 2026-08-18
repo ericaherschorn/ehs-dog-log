@@ -3952,13 +3952,19 @@ function performDogProfileSave(afterSave) {
         refreshManageList(); // new dog: show in list immediately
       } else {
         editingDog.dogName = dogName;
-        // Clear any orphaned "Saving…" labels from other fields before showing "Saved ✓"
+        // Update every field that was showing "Saving…" to "Saved ✓", then clear all together
         document.querySelectorAll("#dog-form-fields .field-save-status").forEach(function(span) {
-          span.className = "save-status field-save-status";
-          span.textContent = "";
+          if (span.textContent) {
+            span.className = "save-status field-save-status saved";
+            span.textContent = "Saved ✓";
+          }
         });
-        showFieldSaveStatus(savedGroup, "saved", "Saved ✓");
-        setTimeout(function() { showFieldSaveStatus(savedGroup, "", ""); }, 3000);
+        setTimeout(function() {
+          document.querySelectorAll("#dog-form-fields .field-save-status").forEach(function(span) {
+            span.className = "save-status field-save-status";
+            span.textContent = "";
+          });
+        }, 3000);
         // Skip refreshManageList() during auto-save of existing dog — calling it
         // moves the form panel in the DOM on every save, which disrupts scroll
         // position and kills keyboard focus on mobile (especially for fields lower
