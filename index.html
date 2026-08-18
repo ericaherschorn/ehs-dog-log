@@ -3837,7 +3837,7 @@ function triggerDogProfileAutoSave(e) {
   if (nameEl && !nameEl.value.trim()) return;
   // Ignore spurious input events that browsers fire immediately after a save completes
   // (contenteditable normalization, selection changes, etc.)
-  if (Date.now() - dogProfileLastSaveCompletedAt < 1000) return;
+  if (Date.now() - dogProfileLastSaveCompletedAt < 150) return;
 
   var target = e && e.target ? e.target : null;
   var group = target ? target.closest(".field-group") : null;
