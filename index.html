@@ -707,15 +707,61 @@
     .hist-comment-short {
       color: var(--muted);
       font-size: 15px;
-      cursor: pointer;
-      display: -webkit-box;
-      -webkit-line-clamp: 2;
-      -webkit-box-orient: vertical;
-      overflow: hidden;
     }
-    .hist-comment-short.expanded {
-      display: block;
-      -webkit-line-clamp: unset;
+
+    /* History view: match log grid width */
+    #view-history .view-inner { max-width: 1400px; }
+
+    /* History tables: whitespace nowrap on desktop, wrap on mobile */
+    .history-table.by-dog td { white-space: nowrap; }
+
+    /* ── Mobile: All Dogs by Date — stack shifts vertically ─── */
+    @media (max-width: 640px) {
+      .history-table.by-date,
+      .history-table.by-date tbody,
+      .history-table.by-date tr,
+      .history-table.by-date td { display: block; width: 100%; box-sizing: border-box; }
+      .history-table.by-date thead { display: none; }
+      .history-table.by-date tr { border-bottom: 2px solid var(--border); }
+      .history-table.by-date td { border-bottom: 1px solid var(--border); padding: 10px 16px; }
+      .history-table.by-date td:first-child {
+        background: var(--green-light);
+        font-weight: 800;
+        font-size: 17px;
+        border-bottom: 1px solid var(--border);
+      }
+      .history-table.by-date td[data-label]::before {
+        content: attr(data-label);
+        display: block;
+        font-size: 11px;
+        font-weight: 800;
+        text-transform: uppercase;
+        letter-spacing: 0.6px;
+        color: var(--muted);
+        margin-bottom: 6px;
+      }
+      .history-table.by-date td.hist-no-entry { display: none; }
+    }
+
+    /* ── Mobile: One Dog Over Time — card layout, no h-scroll ── */
+    @media (max-width: 640px) {
+      .history-table.by-dog,
+      .history-table.by-dog tbody,
+      .history-table.by-dog tr,
+      .history-table.by-dog td { display: block; width: 100%; box-sizing: border-box; white-space: normal; }
+      .history-table.by-dog thead { display: none; }
+      .history-table.by-dog tr { border-bottom: 2px solid var(--border); padding: 4px 0; }
+      .history-table.by-dog td { border-bottom: none; padding: 4px 16px; }
+      .history-table.by-dog td:first-child { font-weight: 800; font-size: 16px; padding-top: 10px; }
+      .history-table.by-dog td[data-label]::before {
+        content: attr(data-label) ": ";
+        font-weight: 800;
+        font-size: 12px;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        color: var(--muted);
+      }
+      .history-table.by-dog td:last-child { padding-bottom: 10px; }
     }
     .hist-empty { color: var(--muted); font-size: 18px; }
     .hist-edit-btn {
@@ -901,7 +947,7 @@
       align-items: flex-start;
       gap: 10px;
     }
-    .dog-mgmt-card.inactive { opacity: 0.65; }
+    .dog-mgmt-card.inactive .dog-mgmt-info { opacity: 0.65; }
     .dog-mgmt-card.editing {
       border-color: var(--green);
       border-bottom-left-radius: 0;
@@ -1300,8 +1346,8 @@
       /* Respite section cards */
       .respite-card { padding: 14px; }
 
-      /* History view table: allow horizontal scroll */
-      .history-table-wrap, .history-table { display: block; overflow-x: auto; }
+      /* History table wrap still allows h-scroll on desktop breakpoint if needed */
+      .history-table-wrap { overflow-x: auto; }
 
       /* Alert cards */
       .alert-card { padding: 14px 16px; }
@@ -2797,8 +2843,7 @@ function renderDogDetailsHtml(dog) {
     feedingItem("Dinner",    dog.dinner) +
   "</div>" +
 
-  section("History", dog.history, true) +
-  section("Feeding Notes", dog.feedingNotes, true) +
+  (dog.feedingNotes ? "<div class='details-section-value' style='margin-top:-8px;margin-bottom:16px;white-space:pre-line;'>" + dog.feedingNotes + "</div>" : "") +
 
   "<div class='details-section'>" +
     "<div class='details-section-label'>Medical</div>" +
@@ -2812,6 +2857,8 @@ function renderDogDetailsHtml(dog) {
       : "<span style='color:var(--muted);font-size:15px;font-weight:800;'>No medication required</span>") +
     (dog.medical ? "<div class='details-section-value' style='margin-top:6px;'>" + dog.medical + "</div>" : "") +
   "</div>" +
+
+  section("History", dog.history, true) +
 
   section("Behaviour & Handling",      dog.behaviour, true) +
   section("Entering/Exiting Kennel",   dog.kennel,    true) +
@@ -2886,7 +2933,7 @@ function renderByDateTable(data, dateStr) {
   var wrap  = document.createElement("div");
   wrap.className = "history-table-wrap";
   var table = document.createElement("table");
-  table.className = "history-table";
+  table.className = "history-table by-date";
 
   var thead = table.createTHead();
   var hrow  = thead.insertRow();
@@ -2923,6 +2970,7 @@ function renderByDateTable(data, dateStr) {
 
       state.shifts.forEach(function(s) {
         var td = tr.insertCell();
+        td.setAttribute("data-label", s.label);
         var key = dog.dogName + "_" + s.key;
         var entry = lookup[key];
         if (entry) {
@@ -2937,6 +2985,7 @@ function renderByDateTable(data, dateStr) {
             td.appendChild(editBtn);
           }
         } else {
+          td.className = "hist-no-entry";
           if (state.isAdmin) {
             var addBtn = document.createElement("button");
             addBtn.className = "hist-add-btn";
@@ -3014,7 +3063,7 @@ function renderByDogTable(entries) {
   var wrap  = document.createElement("div");
   wrap.className = "history-table-wrap";
   var table = document.createElement("table");
-  table.className = "history-table";
+  table.className = "history-table by-dog";
 
   var thead = table.createTHead();
   var hrow  = thead.insertRow();
@@ -3035,23 +3084,22 @@ function renderByDogTable(entries) {
     entries.forEach(function(e) {
       var tr = tbody.insertRow();
       var vals = [
-        formatDateFull(e.date),
-        shiftLabel(e.shift),
-        e.bm   || "—",
-        e.med  || "—",
-        e.food || "—",
-        e.walk || "—"
+        { v: formatDateFull(e.date), label: ""      },
+        { v: shiftLabel(e.shift),    label: "Shift"  },
+        { v: e.bm   || "—",         label: "BM"     },
+        { v: e.med  || "—",         label: "Med"    },
+        { v: e.food || "—",         label: "Food"   },
+        { v: e.walk || "—",         label: "Walk"   }
       ];
-      vals.forEach(function(v) {
+      vals.forEach(function(item) {
         var td = tr.insertCell();
-        td.textContent = v;
-        td.style.whiteSpace = "nowrap";
+        td.textContent = item.v;
+        if (item.label) td.setAttribute("data-label", item.label);
       });
       var commentTd = tr.insertCell();
       var span = document.createElement("span");
       span.className = "hist-comment-short";
       span.innerHTML = e.comments || "";
-      span.onclick = function() { this.classList.toggle("expanded"); };
       commentTd.appendChild(span);
 
       var actionTd = tr.insertCell();
@@ -3080,8 +3128,7 @@ function buildSummaryHtml(entry) {
 
   var html = "<div class='hist-summary'>" + esc(parts.join(" · ")) + "</div>";
   if (entry.comments) {
-    html += "<span class='hist-comment-short' onclick='this.classList.toggle(\"expanded\")'>" +
-      entry.comments + "</span>";
+    html += "<span class='hist-comment-short'>" + entry.comments + "</span>";
   }
   return html;
 }
@@ -3830,6 +3877,26 @@ function wireDogFormAutoSave() {
   document.querySelectorAll("#dog-form-fields .rich-editor").forEach(function(el) {
     el.addEventListener("input", triggerDogProfileAutoSave);
   });
+  // Strip characters that break sheet lookups / HTML from dog name in real-time
+  var nameInput = document.getElementById("f-dogName");
+  if (nameInput) {
+    nameInput.addEventListener("input", function() {
+      var clean = this.value.replace(/["\\<>]/g, "");
+      if (clean !== this.value) this.value = clean;
+    });
+  }
+  // Pre-render blank save-status spans so their reserved space (min-height: 22px)
+  // is always present — prevents layout shift when "Saving…" first appears
+  document.querySelectorAll(
+    "#dog-form-fields input:not([type='file']), #dog-form-fields select, #dog-form-fields .rich-editor"
+  ).forEach(function(el) {
+    var group = el.closest(".field-group");
+    if (group && !group.querySelector(".field-save-status")) {
+      var span = document.createElement("span");
+      span.className = "save-status field-save-status";
+      group.appendChild(span);
+    }
+  });
 }
 
 function triggerDogProfileAutoSave(e) {
@@ -3864,7 +3931,7 @@ function showFieldSaveStatus(group, cls, msg) {
 function performDogProfileSave(afterSave) {
   dogProfileSaveTimer = null;
   var nameEl = document.getElementById("f-dogName");
-  var dogName = nameEl ? nameEl.value.trim() : "";
+  var dogName = nameEl ? nameEl.value.trim().replace(/["\\<>]/g, "") : "";
   if (!dogName) {
     if (afterSave) afterSave();
     return;
