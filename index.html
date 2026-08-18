@@ -2753,7 +2753,7 @@ function toggleMedDetails() {
   var checked = document.getElementById("f-medicationRequired");
   var group   = document.getElementById("med-detail-fields");
   if (!checked || !group) return;
-  group.style.display = checked.checked ? "" : "none";
+  group.style.display = checked.checked ? "grid" : "none";
 }
 
 // ══════════════════════════════════════════════════════════
@@ -2798,6 +2798,7 @@ function renderDogDetailsHtml(dog) {
   "</div>" +
 
   section("History", dog.history, true) +
+  section("Feeding Notes", dog.feedingNotes, true) +
 
   "<div class='details-section'>" +
     "<div class='details-section-label'>Medical</div>" +
@@ -3659,6 +3660,7 @@ var editingDog = null;
 var dogProfileSaveTimer = null;
 var dogProfileSavingNow = false;
 var dogProfileLastChangedGroup = null;
+var dogProfileLastSaveCompletedAt = 0;
 
 function openDogFormWithLock(dog, afterCard, editBtn) {
   if (!dog) { openDogForm(dog, afterCard); return; }
@@ -3833,6 +3835,9 @@ function wireDogFormAutoSave() {
 function triggerDogProfileAutoSave(e) {
   var nameEl = document.getElementById("f-dogName");
   if (nameEl && !nameEl.value.trim()) return;
+  // Ignore spurious input events that browsers fire immediately after a save completes
+  // (contenteditable normalization, selection changes, etc.)
+  if (Date.now() - dogProfileLastSaveCompletedAt < 150) return;
 
   var target = e && e.target ? e.target : null;
   var group = target ? target.closest(".field-group") : null;
@@ -3914,6 +3919,7 @@ function performDogProfileSave(afterSave) {
     medBreakfast:       plainVal("medBreakfast"),
     medLunch:           plainVal("medLunch"),
     medDinner:          plainVal("medDinner"),
+    feedingNotes:       richVal("feedingNotes"),
     history:            richVal("history"),
     walks:              richVal("walks"),
     backyard:           richVal("backyard"),
@@ -3931,6 +3937,7 @@ function performDogProfileSave(afterSave) {
   google.script.run
     .withSuccessHandler(function() {
       dogProfileSavingNow = false;
+      dogProfileLastSaveCompletedAt = Date.now();
       if (!editingDog) {
         // First save — record created; expand to full form
         editingDog = { dogName: dogName };
@@ -3950,8 +3957,21 @@ function performDogProfileSave(afterSave) {
         refreshManageList(); // new dog: show in list immediately
       } else {
         editingDog.dogName = dogName;
-        showFieldSaveStatus(savedGroup, "saved", "Saved ✓");
-        setTimeout(function() { showFieldSaveStatus(savedGroup, "", ""); }, 3000);
+        // Update every field that was showing "Saving…" to "Saved ✓", then clear all together
+        document.querySelectorAll("#dog-form-fields .field-save-status").forEach(function(span) {
+          if (span.textContent === "Saving…") {
+            span.className = "save-status field-save-status saved";
+            span.textContent = "Saved ✓";
+          }
+        });
+        setTimeout(function() {
+          document.querySelectorAll("#dog-form-fields .field-save-status").forEach(function(span) {
+            if (span.textContent === "Saved ✓") {
+              span.className = "save-status field-save-status";
+              span.textContent = "";
+            }
+          });
+        }, 3000);
         // Skip refreshManageList() during auto-save of existing dog — calling it
         // moves the form panel in the DOM on every save, which disrupts scroll
         // position and kills keyboard focus on mobile (especially for fields lower
@@ -4025,18 +4045,20 @@ function buildDogFormHtml(dog) {
       "<input type='checkbox' id='f-walksAllowed'" + walksChecked + ">" +
       "<label for='f-walksAllowed' style='text-transform:none;letter-spacing:0;font-size:17px;font-weight:700;'>Walks Allowed</label>" +
     "</div>";
-  var medDetailsDisplay = (d.medicationRequired === true || d.medicationRequired === "Y") ? "" : "none";
+  var medDetailsDisplay = (d.medicationRequired === true || d.medicationRequired === "Y") ? "grid" : "none";
   var medCheckboxHtml =
-    "<div class='checkbox-group' style='margin:0;'>" +
-      "<input type='checkbox' id='f-medicationRequired'" + medChecked + " onchange='toggleMedDetails()'>" +
-      "<label for='f-medicationRequired' style='text-transform:none;letter-spacing:0;font-size:17px;font-weight:700;'>Medication Required</label>" +
+    "<div class='field-group'>" +
+      "<div class='checkbox-group' style='margin:0;'>" +
+        "<input type='checkbox' id='f-medicationRequired'" + medChecked + " onchange='toggleMedDetails()'>" +
+        "<label for='f-medicationRequired' style='text-transform:none;letter-spacing:0;font-size:17px;font-weight:700;'>Medication Required</label>" +
+      "</div>" +
     "</div>" +
-    "<div id='med-detail-fields' style='display:" + medDetailsDisplay + ";margin-top:12px;'>" +
-      "<div class='field-group' style='margin-bottom:10px;'>" +
+    "<div id='med-detail-fields' style='display:" + medDetailsDisplay + ";grid-template-columns:1fr 1fr;gap:8px;margin-top:12px;'>" +
+      "<div class='field-group'>" +
         "<label class='field-label' for='f-medBreakfast'>Breakfast Medication</label>" +
         "<input type='text' id='f-medBreakfast' value='" + esc(d.medBreakfast || "") + "' placeholder='e.g. 1 Rimadyl'>" +
       "</div>" +
-      "<div class='field-group' style='margin-bottom:10px;'>" +
+      "<div class='field-group'>" +
         "<label class='field-label' for='f-medLunch'>Lunch Medication</label>" +
         "<input type='text' id='f-medLunch' value='" + esc(d.medLunch || "") + "' placeholder='e.g. ½ pill with food'>" +
       "</div>" +
@@ -4125,20 +4147,22 @@ function buildDogFormHtml(dog) {
     colourHtml +
     field("colourReason", "Reason (shown on shift log)", d.colourReason, false) +
 
-    sectionDivider("Feeding") +
+    sectionDivider("Feeding &amp; Meds") +
     field("breakfast",  "Breakfast",               d.breakfast,  false) +
     field("lunch",      "Lunch",                   d.lunch,      false) +
     field("dinner",     "Dinner",                  d.dinner,     false) +
+    "<div class='field-group full-width'>" + medCheckboxHtml + "</div>" +
 
     sectionDivider("Long-form Notes") +
-    richField("history",   "History & Background",              d.history,   true) +
-    richField("medical",   "Medical Notes",                     d.medical,   true, medCheckboxHtml) +
-    richField("behaviour", "Behaviour & Handling",              d.behaviour, true) +
-    richField("kennel",    "Entering/Exiting Kennel Instructions", d.kennel, true) +
-    richField("walks",     "Walk Instructions",                 d.walks,     true, walksCheckboxHtml) +
-    richField("backyard",  "Backyard Instructions",             d.backyard,  true) +
-    richField("likes",     "Likes",                             d.likes,     true) +
-    richField("dislikes",  "Dislikes",                          d.dislikes,  true)
+    richField("history",      "History & Background",                 d.history,      true) +
+    richField("feedingNotes", "Feeding Notes",                        d.feedingNotes, true) +
+    richField("medical",      "Medical Notes",                        d.medical,      true) +
+    richField("behaviour",    "Behaviour & Handling",                 d.behaviour,    true) +
+    richField("kennel",       "Entering/Exiting Kennel Instructions", d.kennel,       true) +
+    richField("walks",        "Walk Instructions",                    d.walks,        true, walksCheckboxHtml) +
+    richField("backyard",     "Backyard Instructions",                d.backyard,     true) +
+    richField("likes",        "Likes",                                d.likes,        true) +
+    richField("dislikes",     "Dislikes",                             d.dislikes,     true)
   );
 }
 

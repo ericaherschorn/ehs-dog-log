@@ -53,27 +53,28 @@ const PC = {
   WEIGHT:              4,
   SEX:                 5,
   ARRIVAL_DATE:        6,
-  HISTORY:             7,
-  WALKS:               8,
-  BACKYARD:            9,
-  MEDICAL:             10,
-  BEHAVIOUR:           11,
-  LIKES:               12,
-  DISLIKES:            13,
-  BREAKFAST:           14,
-  LUNCH:               15,
-  DINNER:              16,
-  COLOUR:              17,
-  COLOUR_REASON:       18,
-  WALKS_ALLOWED:       19,
-  MEDICATION_REQUIRED: 20,
-  MED_B:               21,
-  MED_L:               22,
-  MED_D:               23,
-  STATUS_CHANGED_AT:   24,
-  ADOPTION_DATE:       25,
-  KENNEL:              26,
-  PHOTO_URL:           27
+  ADOPTION_DATE:       7,
+  COLOUR:              8,
+  COLOUR_REASON:       9,
+  BREAKFAST:           10,
+  LUNCH:               11,
+  DINNER:              12,
+  MEDICATION_REQUIRED: 13,
+  MED_B:               14,
+  MED_L:               15,
+  MED_D:               16,
+  HISTORY:             17,
+  FEEDING_NOTES:       18,
+  MEDICAL:             19,
+  BEHAVIOUR:           20,
+  KENNEL:              21,
+  WALKS:               22,
+  WALKS_ALLOWED:       23,
+  BACKYARD:            24,
+  LIKES:               25,
+  DISLIKES:            26,
+  STATUS_CHANGED_AT:   27,
+  PHOTO_URL:           28
 };
 
 // 0-based column indices — Shift Alerts
@@ -104,12 +105,20 @@ const LC = {
 };
 
 const PROFILE_HEADERS = [
+  // Basic info (0–6)
   "Dog Name", "Status", "Breed", "Age", "Weight", "Sex", "Arrival Date",
-  "History", "Walks", "Backyard", "Medical", "Behaviour & Handling",
-  "Likes", "Dislikes", "Breakfast", "Lunch", "Dinner",
-  "Colour", "Colour Reason", "Walks Allowed", "Medication Required",
-  "Med (Breakfast)", "Med (Lunch)", "Med (Dinner)", "Status Changed At", "Adoption Date",
-  "Kennel", "Photo URL"
+  // Scheduling (7)
+  "Adoption Date",
+  // Colour / safety (8–9)
+  "Colour", "Colour Reason",
+  // Feeding & meds (10–16)
+  "Breakfast", "Lunch", "Dinner",
+  "Medication Required", "Med (Breakfast)", "Med (Lunch)", "Med (Dinner)",
+  // Long-form notes (17–26)
+  "History", "Feeding Notes", "Medical", "Behaviour & Handling",
+  "Kennel", "Walks", "Walks Allowed", "Backyard", "Likes", "Dislikes",
+  // System (27–28)
+  "Status Changed At", "Photo URL"
 ];
 
 // 0-based column indices — Respite Schedule
@@ -386,8 +395,9 @@ function rowToProfile_(row) {
     medDinner:           String(row[PC.MED_D] || ""),
     statusChangedAt:     profileDate_(row[PC.STATUS_CHANGED_AT]),
     adoptionDate:        profileDate_(row[PC.ADOPTION_DATE]),
-    kennel:              String(row[PC.KENNEL]     || ""),
-    photoUrl:            String(row[PC.PHOTO_URL]  || "")
+    kennel:              String(row[PC.KENNEL]       || ""),
+    photoUrl:            String(row[PC.PHOTO_URL]   || ""),
+    feedingNotes:        String(row[PC.FEEDING_NOTES] || "")
   };
 }
 
@@ -731,34 +741,35 @@ function saveDogProfile(dogData, email) {
   var sheet  = ss.getSheetByName(PROFILES_TAB);
   var data   = sheet.getDataRange().getValues();
   var newRow = [
-    dogData.dogName       || "",
-    dogData.status        || "Active",
-    dogData.breed         || "",
-    dogData.age           || "",
-    dogData.weight        || "",
-    dogData.sex           || "",
-    dogData.arrivalDate   || "",
-    dogData.history       || "",
-    dogData.walks         || "",
-    dogData.backyard      || "",
-    dogData.medical       || "",
-    dogData.behaviour     || "",
-    dogData.likes         || "",
-    dogData.dislikes      || "",
-    dogData.breakfast     || "",
-    dogData.lunch         || "",
-    dogData.dinner        || "",
-    dogData.colour              || "",
-    dogData.colourReason        || "",
-    dogData.walksAllowed        ? "Y" : "N",
-    dogData.medicationRequired  ? "Y" : "N",
-    dogData.medBreakfast        || "",
-    dogData.medLunch            || "",
-    dogData.medDinner           || "",
-    "", // STATUS_CHANGED_AT — preserved on update below
-    dogData.adoptionDate        || "",
-    dogData.kennel              || "",
-    ""  // PHOTO_URL — preserved on update below
+    dogData.dogName             || "",        // 0  DOG_NAME
+    dogData.status              || "Active",  // 1  STATUS
+    dogData.breed               || "",        // 2  BREED
+    dogData.age                 || "",        // 3  AGE
+    dogData.weight              || "",        // 4  WEIGHT
+    dogData.sex                 || "",        // 5  SEX
+    dogData.arrivalDate         || "",        // 6  ARRIVAL_DATE
+    dogData.adoptionDate        || "",        // 7  ADOPTION_DATE
+    dogData.colour              || "",        // 8  COLOUR
+    dogData.colourReason        || "",        // 9  COLOUR_REASON
+    dogData.breakfast           || "",        // 10 BREAKFAST
+    dogData.lunch               || "",        // 11 LUNCH
+    dogData.dinner              || "",        // 12 DINNER
+    dogData.medicationRequired  ? "Y" : "N", // 13 MEDICATION_REQUIRED
+    dogData.medBreakfast        || "",        // 14 MED_B
+    dogData.medLunch            || "",        // 15 MED_L
+    dogData.medDinner           || "",        // 16 MED_D
+    dogData.history             || "",        // 17 HISTORY
+    dogData.feedingNotes        || "",        // 18 FEEDING_NOTES
+    dogData.medical             || "",        // 19 MEDICAL
+    dogData.behaviour           || "",        // 20 BEHAVIOUR
+    dogData.kennel              || "",        // 21 KENNEL
+    dogData.walks               || "",        // 22 WALKS
+    dogData.walksAllowed        ? "Y" : "N", // 23 WALKS_ALLOWED
+    dogData.backyard            || "",        // 24 BACKYARD
+    dogData.likes               || "",        // 25 LIKES
+    dogData.dislikes            || "",        // 26 DISLIKES
+    "",                                       // 27 STATUS_CHANGED_AT — preserved on update below
+    ""                                        // 28 PHOTO_URL — preserved on update below
   ];
 
   var searchName = dogData.originalDogName || dogData.dogName;
@@ -770,7 +781,8 @@ function saveDogProfile(dogData, email) {
         histSheet.appendRow([new Date(), email].concat(oldRow));
       }
       newRow[PC.STATUS_CHANGED_AT] = data[i][PC.STATUS_CHANGED_AT] || "";
-      sheet.getRange(i + 1, 1, 1, 27).setValues([newRow.slice(0, 27)]);
+      sheet.getRange(i + 1, 1, 1, 28).setValues([newRow.slice(0, 28)]);
+      // PHOTO_URL (index 28, col 29) is not included in slice — preserved as-is
       return { success: true, action: "updated" };
     }
   }
