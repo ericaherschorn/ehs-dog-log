@@ -3841,11 +3841,6 @@ function triggerDogProfileAutoSave(e) {
 
   var target = e && e.target ? e.target : null;
   var group = target ? target.closest(".field-group") : null;
-  // Route medication detail fields to the outer wrapper so status appears near the checkbox
-  if (group) {
-    var medFields = document.getElementById("med-detail-fields");
-    if (medFields && medFields.contains(group)) group = medFields.parentElement;
-  }
   if (group) dogProfileLastChangedGroup = group;
 
   showFieldSaveStatus(dogProfileLastChangedGroup, "saving", "Saving…");
@@ -4052,9 +4047,11 @@ function buildDogFormHtml(dog) {
     "</div>";
   var medDetailsDisplay = (d.medicationRequired === true || d.medicationRequired === "Y") ? "grid" : "none";
   var medCheckboxHtml =
-    "<div class='checkbox-group' style='margin:0;'>" +
-      "<input type='checkbox' id='f-medicationRequired'" + medChecked + " onchange='toggleMedDetails()'>" +
-      "<label for='f-medicationRequired' style='text-transform:none;letter-spacing:0;font-size:17px;font-weight:700;'>Medication Required</label>" +
+    "<div class='field-group'>" +
+      "<div class='checkbox-group' style='margin:0;'>" +
+        "<input type='checkbox' id='f-medicationRequired'" + medChecked + " onchange='toggleMedDetails()'>" +
+        "<label for='f-medicationRequired' style='text-transform:none;letter-spacing:0;font-size:17px;font-weight:700;'>Medication Required</label>" +
+      "</div>" +
     "</div>" +
     "<div id='med-detail-fields' style='display:" + medDetailsDisplay + ";grid-template-columns:1fr 1fr;gap:8px;margin-top:12px;'>" +
       "<div class='field-group'>" +
