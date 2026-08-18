@@ -707,15 +707,6 @@
     .hist-comment-short {
       color: var(--muted);
       font-size: 15px;
-      cursor: pointer;
-      display: -webkit-box;
-      -webkit-line-clamp: 2;
-      -webkit-box-orient: vertical;
-      overflow: hidden;
-    }
-    .hist-comment-short.expanded {
-      display: block;
-      -webkit-line-clamp: unset;
     }
     .hist-empty { color: var(--muted); font-size: 18px; }
     .hist-edit-btn {
@@ -901,7 +892,7 @@
       align-items: flex-start;
       gap: 10px;
     }
-    .dog-mgmt-card.inactive { opacity: 0.65; }
+    .dog-mgmt-card.inactive .dog-mgmt-info { opacity: 0.65; }
     .dog-mgmt-card.editing {
       border-color: var(--green);
       border-bottom-left-radius: 0;
@@ -2797,7 +2788,6 @@ function renderDogDetailsHtml(dog) {
     feedingItem("Dinner",    dog.dinner) +
   "</div>" +
 
-  section("History", dog.history, true) +
   section("Feeding Notes", dog.feedingNotes, true) +
 
   "<div class='details-section'>" +
@@ -2812,6 +2802,8 @@ function renderDogDetailsHtml(dog) {
       : "<span style='color:var(--muted);font-size:15px;font-weight:800;'>No medication required</span>") +
     (dog.medical ? "<div class='details-section-value' style='margin-top:6px;'>" + dog.medical + "</div>" : "") +
   "</div>" +
+
+  section("History", dog.history, true) +
 
   section("Behaviour & Handling",      dog.behaviour, true) +
   section("Entering/Exiting Kennel",   dog.kennel,    true) +
@@ -3051,7 +3043,6 @@ function renderByDogTable(entries) {
       var span = document.createElement("span");
       span.className = "hist-comment-short";
       span.innerHTML = e.comments || "";
-      span.onclick = function() { this.classList.toggle("expanded"); };
       commentTd.appendChild(span);
 
       var actionTd = tr.insertCell();
@@ -3080,8 +3071,7 @@ function buildSummaryHtml(entry) {
 
   var html = "<div class='hist-summary'>" + esc(parts.join(" · ")) + "</div>";
   if (entry.comments) {
-    html += "<span class='hist-comment-short' onclick='this.classList.toggle(\"expanded\")'>" +
-      entry.comments + "</span>";
+    html += "<span class='hist-comment-short'>" + entry.comments + "</span>";
   }
   return html;
 }
@@ -3830,6 +3820,26 @@ function wireDogFormAutoSave() {
   document.querySelectorAll("#dog-form-fields .rich-editor").forEach(function(el) {
     el.addEventListener("input", triggerDogProfileAutoSave);
   });
+  // Strip characters that break sheet lookups / HTML from dog name in real-time
+  var nameInput = document.getElementById("f-dogName");
+  if (nameInput) {
+    nameInput.addEventListener("input", function() {
+      var clean = this.value.replace(/["\\<>]/g, "");
+      if (clean !== this.value) this.value = clean;
+    });
+  }
+  // Pre-render blank save-status spans so their reserved space (min-height: 22px)
+  // is always present — prevents layout shift when "Saving…" first appears
+  document.querySelectorAll(
+    "#dog-form-fields input:not([type='file']), #dog-form-fields select, #dog-form-fields .rich-editor"
+  ).forEach(function(el) {
+    var group = el.closest(".field-group");
+    if (group && !group.querySelector(".field-save-status")) {
+      var span = document.createElement("span");
+      span.className = "save-status field-save-status";
+      group.appendChild(span);
+    }
+  });
 }
 
 function triggerDogProfileAutoSave(e) {
@@ -3864,7 +3874,7 @@ function showFieldSaveStatus(group, cls, msg) {
 function performDogProfileSave(afterSave) {
   dogProfileSaveTimer = null;
   var nameEl = document.getElementById("f-dogName");
-  var dogName = nameEl ? nameEl.value.trim() : "";
+  var dogName = nameEl ? nameEl.value.trim().replace(/["\\<>]/g, "") : "";
   if (!dogName) {
     if (afterSave) afterSave();
     return;
