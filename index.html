@@ -2753,7 +2753,7 @@ function toggleMedDetails() {
   var checked = document.getElementById("f-medicationRequired");
   var group   = document.getElementById("med-detail-fields");
   if (!checked || !group) return;
-  group.style.display = checked.checked ? "" : "none";
+  group.style.display = checked.checked ? "grid" : "none";
 }
 
 // ══════════════════════════════════════════════════════════
@@ -3952,6 +3952,11 @@ function performDogProfileSave(afterSave) {
         refreshManageList(); // new dog: show in list immediately
       } else {
         editingDog.dogName = dogName;
+        // Clear any orphaned "Saving…" labels from other fields before showing "Saved ✓"
+        document.querySelectorAll("#dog-form-fields .field-save-status").forEach(function(span) {
+          span.className = "save-status field-save-status";
+          span.textContent = "";
+        });
         showFieldSaveStatus(savedGroup, "saved", "Saved ✓");
         setTimeout(function() { showFieldSaveStatus(savedGroup, "", ""); }, 3000);
         // Skip refreshManageList() during auto-save of existing dog — calling it
@@ -4027,18 +4032,18 @@ function buildDogFormHtml(dog) {
       "<input type='checkbox' id='f-walksAllowed'" + walksChecked + ">" +
       "<label for='f-walksAllowed' style='text-transform:none;letter-spacing:0;font-size:17px;font-weight:700;'>Walks Allowed</label>" +
     "</div>";
-  var medDetailsDisplay = (d.medicationRequired === true || d.medicationRequired === "Y") ? "" : "none";
+  var medDetailsDisplay = (d.medicationRequired === true || d.medicationRequired === "Y") ? "grid" : "none";
   var medCheckboxHtml =
     "<div class='checkbox-group' style='margin:0;'>" +
       "<input type='checkbox' id='f-medicationRequired'" + medChecked + " onchange='toggleMedDetails()'>" +
       "<label for='f-medicationRequired' style='text-transform:none;letter-spacing:0;font-size:17px;font-weight:700;'>Medication Required</label>" +
     "</div>" +
-    "<div id='med-detail-fields' style='display:" + medDetailsDisplay + ";margin-top:12px;'>" +
-      "<div class='field-group' style='margin-bottom:10px;'>" +
+    "<div id='med-detail-fields' style='display:" + medDetailsDisplay + ";grid-template-columns:1fr 1fr;gap:8px;margin-top:12px;'>" +
+      "<div class='field-group'>" +
         "<label class='field-label' for='f-medBreakfast'>Breakfast Medication</label>" +
         "<input type='text' id='f-medBreakfast' value='" + esc(d.medBreakfast || "") + "' placeholder='e.g. 1 Rimadyl'>" +
       "</div>" +
-      "<div class='field-group' style='margin-bottom:10px;'>" +
+      "<div class='field-group'>" +
         "<label class='field-label' for='f-medLunch'>Lunch Medication</label>" +
         "<input type='text' id='f-medLunch' value='" + esc(d.medLunch || "") + "' placeholder='e.g. ½ pill with food'>" +
       "</div>" +
