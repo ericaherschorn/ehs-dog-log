@@ -712,8 +712,8 @@
     /* History view: match log grid width */
     #view-history .view-inner { max-width: 1400px; }
 
-    /* History tables: whitespace nowrap on desktop, wrap on mobile */
-    .history-table.by-dog td { white-space: nowrap; }
+    /* History tables: nowrap on stat cells only; Comments + Edit cells wrap normally */
+    .history-table.by-dog td:not(:nth-child(7)):not(:nth-child(8)) { white-space: nowrap; }
 
     /* ── Mobile: All Dogs by Date — stack shifts vertically ─── */
     @media (max-width: 640px) {
@@ -743,16 +743,25 @@
       .history-table.by-date td.hist-no-entry { display: none; }
     }
 
-    /* ── Mobile: One Dog Over Time — card layout, no h-scroll ── */
+    /* ── Mobile: One Dog Over Time — date block, stats inline, comments below ── */
     @media (max-width: 640px) {
       .history-table.by-dog,
       .history-table.by-dog tbody,
       .history-table.by-dog tr,
       .history-table.by-dog td { display: block; width: 100%; box-sizing: border-box; white-space: normal; }
       .history-table.by-dog thead { display: none; }
-      .history-table.by-dog tr { border-bottom: 2px solid var(--border); padding: 4px 0; }
-      .history-table.by-dog td { border-bottom: none; padding: 4px 16px; }
-      .history-table.by-dog td:first-child { font-weight: 800; font-size: 16px; padding-top: 10px; }
+      .history-table.by-dog tr { border-bottom: 2px solid var(--border); }
+
+      /* Date */
+      .history-table.by-dog td:nth-child(1) { font-weight: 800; font-size: 16px; padding: 10px 16px 4px; }
+
+      /* Stats: Shift · BM · Med · Food · Walk all inline on one row */
+      .history-table.by-dog td:nth-child(2),
+      .history-table.by-dog td:nth-child(3),
+      .history-table.by-dog td:nth-child(4),
+      .history-table.by-dog td:nth-child(5),
+      .history-table.by-dog td:nth-child(6) { display: inline; padding: 0; font-size: 15px; white-space: nowrap; border: none; }
+      .history-table.by-dog td:nth-child(2) { padding-left: 16px; }
       .history-table.by-dog td[data-label]::before {
         content: attr(data-label) ": ";
         font-weight: 800;
@@ -761,7 +770,15 @@
         letter-spacing: 0.5px;
         color: var(--muted);
       }
-      .history-table.by-dog td:last-child { padding-bottom: 10px; }
+      .history-table.by-dog td:nth-child(2)::after,
+      .history-table.by-dog td:nth-child(3)::after,
+      .history-table.by-dog td:nth-child(4)::after,
+      .history-table.by-dog td:nth-child(5)::after { content: " · "; color: var(--muted); }
+
+      /* Comments */
+      .history-table.by-dog td:nth-child(7) { display: block; padding: 4px 16px; }
+      /* Edit button */
+      .history-table.by-dog td:nth-child(8) { display: block; padding: 4px 16px 10px; }
     }
     .hist-empty { color: var(--muted); font-size: 18px; }
     .hist-edit-btn {
@@ -3014,6 +3031,10 @@ function renderByDateTable(data, dateStr) {
 function buildDogSelector() {
   var container = document.getElementById("hist-dog-selector");
   container.innerHTML = "";
+  if (!state.historyDog && state.dogs.length > 0) {
+    state.historyDog  = state.dogs[0].dogName;
+    state.historyDays = 14;
+  }
   state.dogs.forEach(function(dog) {
     var btn = document.createElement("button");
     btn.className = "filter-btn" + (dog.dogName === state.historyDog ? " active" : "");
