@@ -708,6 +708,61 @@
       color: var(--muted);
       font-size: 15px;
     }
+
+    /* History view: match log grid width */
+    #view-history .view-inner { max-width: 1400px; }
+
+    /* History tables: whitespace nowrap on desktop, wrap on mobile */
+    .history-table.by-dog td { white-space: nowrap; }
+
+    /* ── Mobile: All Dogs by Date — stack shifts vertically ─── */
+    @media (max-width: 640px) {
+      .history-table.by-date,
+      .history-table.by-date tbody,
+      .history-table.by-date tr,
+      .history-table.by-date td { display: block; width: 100%; box-sizing: border-box; }
+      .history-table.by-date thead { display: none; }
+      .history-table.by-date tr { border-bottom: 2px solid var(--border); }
+      .history-table.by-date td { border-bottom: 1px solid var(--border); padding: 10px 16px; }
+      .history-table.by-date td:first-child {
+        background: var(--green-light);
+        font-weight: 800;
+        font-size: 17px;
+        border-bottom: 1px solid var(--border);
+      }
+      .history-table.by-date td[data-label]::before {
+        content: attr(data-label);
+        display: block;
+        font-size: 11px;
+        font-weight: 800;
+        text-transform: uppercase;
+        letter-spacing: 0.6px;
+        color: var(--muted);
+        margin-bottom: 6px;
+      }
+      .history-table.by-date td.hist-no-entry { display: none; }
+    }
+
+    /* ── Mobile: One Dog Over Time — card layout, no h-scroll ── */
+    @media (max-width: 640px) {
+      .history-table.by-dog,
+      .history-table.by-dog tbody,
+      .history-table.by-dog tr,
+      .history-table.by-dog td { display: block; width: 100%; box-sizing: border-box; white-space: normal; }
+      .history-table.by-dog thead { display: none; }
+      .history-table.by-dog tr { border-bottom: 2px solid var(--border); padding: 4px 0; }
+      .history-table.by-dog td { border-bottom: none; padding: 4px 16px; }
+      .history-table.by-dog td:first-child { font-weight: 800; font-size: 16px; padding-top: 10px; }
+      .history-table.by-dog td[data-label]::before {
+        content: attr(data-label) ": ";
+        font-weight: 800;
+        font-size: 12px;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        color: var(--muted);
+      }
+      .history-table.by-dog td:last-child { padding-bottom: 10px; }
+    }
     .hist-empty { color: var(--muted); font-size: 18px; }
     .hist-edit-btn {
       font-size: 15px;
@@ -1291,8 +1346,8 @@
       /* Respite section cards */
       .respite-card { padding: 14px; }
 
-      /* History view table: allow horizontal scroll */
-      .history-table-wrap, .history-table { display: block; overflow-x: auto; }
+      /* History table wrap still allows h-scroll on desktop breakpoint if needed */
+      .history-table-wrap { overflow-x: auto; }
 
       /* Alert cards */
       .alert-card { padding: 14px 16px; }
@@ -2788,7 +2843,7 @@ function renderDogDetailsHtml(dog) {
     feedingItem("Dinner",    dog.dinner) +
   "</div>" +
 
-  section("Feeding Notes", dog.feedingNotes, true) +
+  (dog.feedingNotes ? "<div class='details-section-value' style='margin-top:-8px;margin-bottom:16px;white-space:pre-line;'>" + dog.feedingNotes + "</div>" : "") +
 
   "<div class='details-section'>" +
     "<div class='details-section-label'>Medical</div>" +
@@ -2878,7 +2933,7 @@ function renderByDateTable(data, dateStr) {
   var wrap  = document.createElement("div");
   wrap.className = "history-table-wrap";
   var table = document.createElement("table");
-  table.className = "history-table";
+  table.className = "history-table by-date";
 
   var thead = table.createTHead();
   var hrow  = thead.insertRow();
@@ -2915,6 +2970,7 @@ function renderByDateTable(data, dateStr) {
 
       state.shifts.forEach(function(s) {
         var td = tr.insertCell();
+        td.setAttribute("data-label", s.label);
         var key = dog.dogName + "_" + s.key;
         var entry = lookup[key];
         if (entry) {
@@ -2929,6 +2985,7 @@ function renderByDateTable(data, dateStr) {
             td.appendChild(editBtn);
           }
         } else {
+          td.className = "hist-no-entry";
           if (state.isAdmin) {
             var addBtn = document.createElement("button");
             addBtn.className = "hist-add-btn";
@@ -3006,7 +3063,7 @@ function renderByDogTable(entries) {
   var wrap  = document.createElement("div");
   wrap.className = "history-table-wrap";
   var table = document.createElement("table");
-  table.className = "history-table";
+  table.className = "history-table by-dog";
 
   var thead = table.createTHead();
   var hrow  = thead.insertRow();
@@ -3027,17 +3084,17 @@ function renderByDogTable(entries) {
     entries.forEach(function(e) {
       var tr = tbody.insertRow();
       var vals = [
-        formatDateFull(e.date),
-        shiftLabel(e.shift),
-        e.bm   || "—",
-        e.med  || "—",
-        e.food || "—",
-        e.walk || "—"
+        { v: formatDateFull(e.date), label: ""      },
+        { v: shiftLabel(e.shift),    label: "Shift"  },
+        { v: e.bm   || "—",         label: "BM"     },
+        { v: e.med  || "—",         label: "Med"    },
+        { v: e.food || "—",         label: "Food"   },
+        { v: e.walk || "—",         label: "Walk"   }
       ];
-      vals.forEach(function(v) {
+      vals.forEach(function(item) {
         var td = tr.insertCell();
-        td.textContent = v;
-        td.style.whiteSpace = "nowrap";
+        td.textContent = item.v;
+        if (item.label) td.setAttribute("data-label", item.label);
       });
       var commentTd = tr.insertCell();
       var span = document.createElement("span");
