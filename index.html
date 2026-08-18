@@ -2798,6 +2798,7 @@ function renderDogDetailsHtml(dog) {
   "</div>" +
 
   section("History", dog.history, true) +
+  section("Feeding Notes", dog.feedingNotes, true) +
 
   "<div class='details-section'>" +
     "<div class='details-section-label'>Medical</div>" +
@@ -3914,6 +3915,7 @@ function performDogProfileSave(afterSave) {
     medBreakfast:       plainVal("medBreakfast"),
     medLunch:           plainVal("medLunch"),
     medDinner:          plainVal("medDinner"),
+    feedingNotes:       richVal("feedingNotes"),
     history:            richVal("history"),
     walks:              richVal("walks"),
     backyard:           richVal("backyard"),
@@ -4125,20 +4127,22 @@ function buildDogFormHtml(dog) {
     colourHtml +
     field("colourReason", "Reason (shown on shift log)", d.colourReason, false) +
 
-    sectionDivider("Feeding") +
+    sectionDivider("Feeding &amp; Meds") +
     field("breakfast",  "Breakfast",               d.breakfast,  false) +
     field("lunch",      "Lunch",                   d.lunch,      false) +
     field("dinner",     "Dinner",                  d.dinner,     false) +
+    "<div class='field-group full-width'>" + medCheckboxHtml + "</div>" +
 
     sectionDivider("Long-form Notes") +
-    richField("history",   "History & Background",              d.history,   true) +
-    richField("medical",   "Medical Notes",                     d.medical,   true, medCheckboxHtml) +
-    richField("behaviour", "Behaviour & Handling",              d.behaviour, true) +
-    richField("kennel",    "Entering/Exiting Kennel Instructions", d.kennel, true) +
-    richField("walks",     "Walk Instructions",                 d.walks,     true, walksCheckboxHtml) +
-    richField("backyard",  "Backyard Instructions",             d.backyard,  true) +
-    richField("likes",     "Likes",                             d.likes,     true) +
-    richField("dislikes",  "Dislikes",                          d.dislikes,  true)
+    richField("history",      "History & Background",                 d.history,      true) +
+    richField("feedingNotes", "Feeding Notes",                        d.feedingNotes, true) +
+    richField("medical",      "Medical Notes",                        d.medical,      true) +
+    richField("behaviour",    "Behaviour & Handling",                 d.behaviour,    true) +
+    richField("kennel",       "Entering/Exiting Kennel Instructions", d.kennel,       true) +
+    richField("walks",        "Walk Instructions",                    d.walks,        true, walksCheckboxHtml) +
+    richField("backyard",     "Backyard Instructions",                d.backyard,     true) +
+    richField("likes",        "Likes",                                d.likes,        true) +
+    richField("dislikes",     "Dislikes",                             d.dislikes,     true)
   );
 }
 

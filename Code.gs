@@ -73,7 +73,8 @@ const PC = {
   STATUS_CHANGED_AT:   24,
   ADOPTION_DATE:       25,
   KENNEL:              26,
-  PHOTO_URL:           27
+  PHOTO_URL:           27,
+  FEEDING_NOTES:       28
 };
 
 // 0-based column indices — Shift Alerts
@@ -109,7 +110,7 @@ const PROFILE_HEADERS = [
   "Likes", "Dislikes", "Breakfast", "Lunch", "Dinner",
   "Colour", "Colour Reason", "Walks Allowed", "Medication Required",
   "Med (Breakfast)", "Med (Lunch)", "Med (Dinner)", "Status Changed At", "Adoption Date",
-  "Kennel", "Photo URL"
+  "Kennel", "Photo URL", "Feeding Notes"
 ];
 
 // 0-based column indices — Respite Schedule
@@ -386,8 +387,9 @@ function rowToProfile_(row) {
     medDinner:           String(row[PC.MED_D] || ""),
     statusChangedAt:     profileDate_(row[PC.STATUS_CHANGED_AT]),
     adoptionDate:        profileDate_(row[PC.ADOPTION_DATE]),
-    kennel:              String(row[PC.KENNEL]     || ""),
-    photoUrl:            String(row[PC.PHOTO_URL]  || "")
+    kennel:              String(row[PC.KENNEL]       || ""),
+    photoUrl:            String(row[PC.PHOTO_URL]   || ""),
+    feedingNotes:        String(row[PC.FEEDING_NOTES] || "")
   };
 }
 
@@ -758,7 +760,8 @@ function saveDogProfile(dogData, email) {
     "", // STATUS_CHANGED_AT — preserved on update below
     dogData.adoptionDate        || "",
     dogData.kennel              || "",
-    ""  // PHOTO_URL — preserved on update below
+    "",                              // PHOTO_URL — preserved on update below
+    dogData.feedingNotes        || ""
   ];
 
   var searchName = dogData.originalDogName || dogData.dogName;
@@ -771,6 +774,7 @@ function saveDogProfile(dogData, email) {
       }
       newRow[PC.STATUS_CHANGED_AT] = data[i][PC.STATUS_CHANGED_AT] || "";
       sheet.getRange(i + 1, 1, 1, 27).setValues([newRow.slice(0, 27)]);
+      sheet.getRange(i + 1, PC.FEEDING_NOTES + 1, 1, 1).setValue(dogData.feedingNotes || "");
       return { success: true, action: "updated" };
     }
   }
