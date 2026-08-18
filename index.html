@@ -3947,15 +3947,21 @@ function performDogProfileSave(afterSave) {
         var fieldsEl = document.getElementById("dog-form-fields");
         fieldsEl.innerHTML = buildDogFormHtml(editingDog);
         wireDogFormAutoSave();
+        refreshManageList(); // new dog: show in list immediately
       } else {
         editingDog.dogName = dogName;
         showFieldSaveStatus(savedGroup, "saved", "Saved ✓");
         setTimeout(function() { showFieldSaveStatus(savedGroup, "", ""); }, 3000);
+        // Skip refreshManageList() during auto-save of existing dog — calling it
+        // moves the form panel in the DOM on every save, which disrupts scroll
+        // position and kills keyboard focus on mobile (especially for fields lower
+        // in the form like Feeding and Medication). The list refreshes correctly
+        // on Done. If this is an explicit save-then-close (afterSave set), refresh.
+        if (afterSave) refreshManageList();
       }
       google.script.run
         .withSuccessHandler(function(dogs) { state.dogs = dogs; })
         .getActiveDogs();
-      refreshManageList();
       if (afterSave) afterSave();
     })
     .withFailureHandler(function(err) {
