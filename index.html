@@ -3660,6 +3660,7 @@ var editingDog = null;
 var dogProfileSaveTimer = null;
 var dogProfileSavingNow = false;
 var dogProfileLastChangedGroup = null;
+var dogProfileLastSaveCompletedAt = 0;
 
 function openDogFormWithLock(dog, afterCard, editBtn) {
   if (!dog) { openDogForm(dog, afterCard); return; }
@@ -3834,9 +3835,17 @@ function wireDogFormAutoSave() {
 function triggerDogProfileAutoSave(e) {
   var nameEl = document.getElementById("f-dogName");
   if (nameEl && !nameEl.value.trim()) return;
+  // Ignore spurious input events that browsers fire immediately after a save completes
+  // (contenteditable normalization, selection changes, etc.)
+  if (Date.now() - dogProfileLastSaveCompletedAt < 1000) return;
 
   var target = e && e.target ? e.target : null;
   var group = target ? target.closest(".field-group") : null;
+  // Route medication detail fields to the outer wrapper so status appears near the checkbox
+  if (group) {
+    var medFields = document.getElementById("med-detail-fields");
+    if (medFields && medFields.contains(group)) group = medFields.parentElement;
+  }
   if (group) dogProfileLastChangedGroup = group;
 
   showFieldSaveStatus(dogProfileLastChangedGroup, "saving", "Saving…");
@@ -3933,6 +3942,7 @@ function performDogProfileSave(afterSave) {
   google.script.run
     .withSuccessHandler(function() {
       dogProfileSavingNow = false;
+      dogProfileLastSaveCompletedAt = Date.now();
       if (!editingDog) {
         // First save — record created; expand to full form
         editingDog = { dogName: dogName };
@@ -3954,15 +3964,17 @@ function performDogProfileSave(afterSave) {
         editingDog.dogName = dogName;
         // Update every field that was showing "Saving…" to "Saved ✓", then clear all together
         document.querySelectorAll("#dog-form-fields .field-save-status").forEach(function(span) {
-          if (span.textContent) {
+          if (span.textContent === "Saving…") {
             span.className = "save-status field-save-status saved";
             span.textContent = "Saved ✓";
           }
         });
         setTimeout(function() {
           document.querySelectorAll("#dog-form-fields .field-save-status").forEach(function(span) {
-            span.className = "save-status field-save-status";
-            span.textContent = "";
+            if (span.textContent === "Saved ✓") {
+              span.className = "save-status field-save-status";
+              span.textContent = "";
+            }
           });
         }, 3000);
         // Skip refreshManageList() during auto-save of existing dog — calling it
