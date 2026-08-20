@@ -536,6 +536,7 @@
       white-space: pre-line;
       color: var(--text);
     }
+    .details-feeding-notes { margin-top: -8px; margin-bottom: 16px; }
     .details-feeding-grid {
       display: grid;
       grid-template-columns: repeat(3, 1fr);
@@ -707,6 +708,7 @@
     .hist-comment-short {
       color: var(--muted);
       font-size: 15px;
+      white-space: pre-line;
     }
 
     /* History view: match log grid width */
@@ -740,7 +742,7 @@
         color: var(--muted);
         margin-bottom: 6px;
       }
-      .history-table.by-date td.hist-no-entry { display: none; }
+      .history-table.by-date td.hist-no-entry:not(.hist-has-add-btn) { display: none; }
     }
 
     /* ── Mobile: One Dog Over Time — date block, stats inline, comments below ── */
@@ -2860,7 +2862,7 @@ function renderDogDetailsHtml(dog) {
     feedingItem("Dinner",    dog.dinner) +
   "</div>" +
 
-  (dog.feedingNotes ? "<div class='details-section-value' style='margin-top:-8px;margin-bottom:16px;white-space:pre-line;'>" + dog.feedingNotes + "</div>" : "") +
+  (dog.feedingNotes ? "<div class='details-section-value details-feeding-notes'>" + dog.feedingNotes + "</div>" : "") +
 
   "<div class='details-section'>" +
     "<div class='details-section-label'>Medical</div>" +
@@ -3002,7 +3004,7 @@ function renderByDateTable(data, dateStr) {
             td.appendChild(editBtn);
           }
         } else {
-          td.className = "hist-no-entry";
+          td.className = state.isAdmin ? "hist-no-entry hist-has-add-btn" : "hist-no-entry";
           if (state.isAdmin) {
             var addBtn = document.createElement("button");
             addBtn.className = "hist-add-btn";
@@ -3120,7 +3122,7 @@ function renderByDogTable(entries) {
       var commentTd = tr.insertCell();
       var span = document.createElement("span");
       span.className = "hist-comment-short";
-      span.innerHTML = e.comments || "";
+      span.textContent = e.comments || "";
       commentTd.appendChild(span);
 
       var actionTd = tr.insertCell();
@@ -3149,7 +3151,7 @@ function buildSummaryHtml(entry) {
 
   var html = "<div class='hist-summary'>" + esc(parts.join(" · ")) + "</div>";
   if (entry.comments) {
-    html += "<span class='hist-comment-short'>" + entry.comments + "</span>";
+    html += "<span class='hist-comment-short'>" + esc(entry.comments) + "</span>";
   }
   return html;
 }

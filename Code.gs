@@ -377,9 +377,10 @@ function rowToProfile_(row) {
     sex:         String(row[PC.SEX]          || ""),
     arrivalDate: profileDate_(row[PC.ARRIVAL_DATE]),
     history:     String(row[PC.HISTORY]      || ""),
+    feedingNotes:        String(row[PC.FEEDING_NOTES] || ""),
+    medical:     String(row[PC.MEDICAL]      || ""),
     walks:       String(row[PC.WALKS]        || ""),
     backyard:    String(row[PC.BACKYARD]     || ""),
-    medical:     String(row[PC.MEDICAL]      || ""),
     behaviour:   String(row[PC.BEHAVIOUR]    || ""),
     likes:       String(row[PC.LIKES]        || ""),
     dislikes:    String(row[PC.DISLIKES]     || ""),
@@ -396,8 +397,7 @@ function rowToProfile_(row) {
     statusChangedAt:     profileDate_(row[PC.STATUS_CHANGED_AT]),
     adoptionDate:        profileDate_(row[PC.ADOPTION_DATE]),
     kennel:              String(row[PC.KENNEL]       || ""),
-    photoUrl:            String(row[PC.PHOTO_URL]   || ""),
-    feedingNotes:        String(row[PC.FEEDING_NOTES] || "")
+    photoUrl:            String(row[PC.PHOTO_URL]   || "")
   };
 }
 
